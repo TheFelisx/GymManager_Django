@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi reserva | {{ gym.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 640px;">
+    <h2 class="mb-3">Consultar o cancelar mi reserva</h2>
+    <form method="post" novalidate class="mb-4">
+        {% csrf_token %}
+        {% include 'partials/campos_form.html' %}
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
+
+    {% if inscripcion %}
+        <div class="border rounded p-3">
+            <h5>{{ inscripcion.sesion.clase.nombre }}</h5>
+            <p class="mb-1">{{ inscripcion.sesion.fecha|date:"d/m/Y" }} · {{ inscripcion.sesion.hora_inicio|time:"H:i" }} · {{ inscripcion.sesion.clase.sala.nombre }}</p>
+            <p class="mb-1">Estado: <strong>{{ inscripcion.get_estado_display }}</strong> · {% if inscripcion.pagada %}Pagada{% else %}Pago pendiente ${{ inscripcion.monto|floatformat:"0g" }}{% endif %}</p>
+            <p class="small mb-2">{% if inscripcion.es_prueba %}<span class="text-success fw-bold">Primera clase de prueba: no se cobra.</span>{% endif %}</p>
+            {% if qr %}<img src="{{ qr }}" alt="Código QR de acceso" class="img-fluid mb-1" style="max-width: 220px; background: #fff;">{% endif %}
+            <p class="small {% if estado_codigo == 'vigente' %}text-success{% else %}text-muted{% endif %}">{{ estado_texto }}</p>
+            {% if inscripcion.estado == 'CONFIRMADA' %}
+                <form method="post" onsubmit="return confirm('¿Cancelar esta reserva?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="codigo" value="{{ inscripcion.codigo }}"><input type="hidden" name="email" value="{{ inscripcion.visitante.email }}">
+                    <input type="hidden" name="accion" value="cancelar">
+                    <button class="btn btn-outline-danger btn-sm mt-2">Cancelar reserva</button>
+                </form>
+            {% endif %}
+        </div>
+    {% elif reserva %}
+        <div class="border rounded p-3">
+            <h5>{{ reserva.sala.nombre }}</h5>
+            <p class="mb-1">{{ reserva.fecha|date:"d/m/Y" }} · {{ reserva.hora_inicio|time:"H:i" }}–{{ reserva.hora_fin|time:"H:i" }} · {{ reserva.personas }} persona{{ reserva.personas|pluralize }}</p>
+            <p class="mb-1">Estado: <strong>{{ reserva.get_estado_display }}</strong> · Precio ${{ reserva.precio|floatformat:"0g" }} (pagado ${{ reserva.monto_pagado|floatformat:"0g" }})</p>
+            {% if reserva.nota %}<p class="small text-muted">{{ reserva.nota }}</p>{% endif %}
+            {% if qr %}<img src="{{ qr }}" alt="Código QR de acceso" class="img-fluid mb-1" style="max-width: 220px; background: #fff;">{% endif %}
+            <p class="small {% if estado_codigo == 'vigente' %}text-success{% else %}text-muted{% endif %}">{{ estado_texto }}</p>
+            {% if reserva.estado == 'SOLICITADA' or reserva.estado == 'APROBADA' %}
+                <form method="post" onsubmit="return confirm('¿Cancelar esta reserva?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="codigo" value="{{ reserva.codigo }}"><input type="hidden" name="email" value="{{ reserva.visitante.email }}">
+                    <input type="hidden" name="accion" value="cancelar">
+                    <button class="btn btn-outline-danger btn-sm mt-2">Cancelar reserva</button>
+                    <div class="small text-muted mt-1">Sin costo hasta 48 horas antes.</div>
+                </form>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

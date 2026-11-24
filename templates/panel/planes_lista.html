@@ -1,0 +1,65 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Planes | GymManager Pro{% endblock %}
+{% block page_title %}Planes{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-2 mb-sm-0 text-gray-800">Planes del gimnasio</h1>
+    {% if puede_editar %}
+        <a href="{% url 'panel:crear_plan' %}" class="btn btn-primary btn-sm btn-icon-split">
+            <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
+            <span class="text">Crear plan</span>
+        </a>
+    {% endif %}
+</div>
+
+<div class="card shadow mb-4">
+    {% if pagina %}
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th><th>Precio</th><th>Duración</th><th>Horario y días</th>
+                            <th>Socios vigentes</th>{% if puede_editar %}<th>Ingresos</th>{% endif %}<th>Estado</th>
+                            {% if puede_editar %}<th class="no-sort">Acciones</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for plan in pagina %}
+                            <tr>
+                                <td class="font-weight-bold">{{ plan.nombre }}</td>
+                                <td>${{ plan.precio|floatformat:"0g" }}</td>
+                                <td>{{ plan.duracion_dias }} días</td>
+                                <td><span class="badge badge-light border">{{ plan.resumen_horario }}</span><br><small class="text-muted">{{ plan.resumen_clases }}</small></td>
+                                <td>{{ plan.socios_vigentes }}</td>
+                                {% if puede_editar %}<td>${{ plan.ingresos|default:0|floatformat:"0g" }}</td>{% endif %}
+                                <td>
+                                    {% if plan.activo %}<span class="badge badge-success">Activo</span>{% else %}<span class="badge badge-secondary">Inactivo</span>{% endif %}
+                                </td>
+                                {% if puede_editar %}
+                                    <td class="text-nowrap">
+                                        <a href="{% url 'panel:editar_plan' plan.pk %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-edit"></i> Editar</a>
+                                        <form method="post" action="{% url 'panel:alternar_plan' plan.pk %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-{% if plan.activo %}secondary{% else %}success{% endif %} btn-sm">
+                                                {% if plan.activo %}Desactivar{% else %}Activar{% endif %}
+                                            </button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'partials/paginacion.html' %}
+            <p class="small text-muted mt-3 mb-0">Los planes nunca se borran: se desactivan y dejan de ofrecerse, pero conservan su historial.</p>
+        </div>
+    {% else %}
+        <div class="empty-state"><i class="fas fa-clipboard-list"></i>No hay planes creados.</div>
+    {% endif %}
+</div>
+{% endblock %}
+

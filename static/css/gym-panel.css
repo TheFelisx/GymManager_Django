@@ -1,0 +1,217 @@
+/* ==========================================================
+   GymManager Pro – ajustes de marca sobre SB Admin 2 (Bootstrap 4)
+   Colores tomados de la plantilla pública Fitness:
+     primario  #C80036   |   oscuro  #0C1844
+   ========================================================== */
+
+:root {
+    --gym-primary: #C80036;
+    --gym-primary-dark: #a30029;
+    --gym-dark: #0C1844;
+    --gym-dark-2: #060d2b;
+}
+
+/* ---------- Colores de marca ---------- */
+a { color: var(--gym-primary); }
+a:hover { color: var(--gym-primary-dark); }
+
+.text-primary { color: var(--gym-primary) !important; }
+.bg-primary { background-color: var(--gym-primary) !important; }
+.border-left-primary { border-left: .25rem solid var(--gym-primary) !important; }
+.badge-primary { background-color: var(--gym-primary); }
+
+.btn-primary {
+    background-color: var(--gym-primary);
+    border-color: var(--gym-primary);
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+.btn-primary:not(:disabled):not(.disabled):active {
+    background-color: var(--gym-primary-dark);
+    border-color: var(--gym-primary-dark);
+}
+.btn-primary:focus { box-shadow: 0 0 0 .2rem rgba(200, 0, 54, .35); }
+
+.btn-outline-primary { color: var(--gym-primary); border-color: var(--gym-primary); }
+.btn-outline-primary:hover { background-color: var(--gym-primary); border-color: var(--gym-primary); }
+
+.form-control:focus, .form-select:focus {
+    border-color: #e2406a;
+    box-shadow: 0 0 0 .2rem rgba(200, 0, 54, .2);
+}
+
+.page-item.active .page-link {
+    background-color: var(--gym-primary);
+    border-color: var(--gym-primary);
+}
+.page-link { color: var(--gym-primary); }
+
+/* ---------- Sidebar y fondos ---------- */
+.bg-gym-sidebar {
+    background-color: var(--gym-dark);
+    background-image: linear-gradient(180deg, var(--gym-dark) 10%, var(--gym-dark-2) 100%);
+    background-size: cover;
+}
+.sidebar-dark .nav-item.active .nav-link { color: #fff; }
+.sidebar-dark .nav-item.active .nav-link i { color: var(--gym-primary); }
+.sidebar-dark .nav-item .nav-link:hover i { color: var(--gym-primary); }
+.sidebar-dark .sidebar-brand-icon i { color: var(--gym-primary); }
+.sidebar .sidebar-role {
+    color: rgba(255, 255, 255, .55);
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    text-align: center;
+    padding: .25rem 1rem .75rem;
+}
+
+.bg-gym-login {
+    background-color: var(--gym-dark);
+    background-image: linear-gradient(135deg, var(--gym-dark) 0%, var(--gym-primary) 140%);
+    min-height: 100vh;
+}
+
+/* ---------- Compatibilidad con clases de Bootstrap 5 ----------
+   Los formularios de Django usan `form-select` y `form-check-input`
+   (Bootstrap 5). SB Admin 2 usa Bootstrap 4, así que se replican aquí. */
+select.form-select {
+    display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem 1.75rem .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #6e707e;
+    vertical-align: middle;
+    background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat right .75rem center / 8px 10px;
+    border: 1px solid #d1d3e2;
+    border-radius: .35rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+input[type="file"].form-control { height: auto; padding: .375rem .75rem; }
+.form-group .form-check { padding-left: 1.5rem; }
+
+/* ---------- Pequeños detalles ---------- */
+.page-title { font-weight: 700; color: var(--gym-dark); }
+.stat-icon { font-size: 2rem; color: #dddfeb; }
+.avatar-circle {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: var(--gym-dark); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 2rem; font-weight: 700;
+}
+.object-cover { object-fit: cover; }
+.table thead th { white-space: nowrap; }
+.empty-state { padding: 2.5rem 1rem; text-align: center; color: #858796; }
+.empty-state i { font-size: 2rem; margin-bottom: .75rem; color: #d1d3e2; display: block; }
+
+/* ---------- Login estilo SB Admin con inputs redondeados ---------- */
+.form-user .form-control {
+    border-radius: 10rem;
+    padding: 1.5rem 1rem;
+    height: auto;
+    font-size: .9rem;
+}
+.form-user .btn-user {
+    border-radius: 10rem;
+    padding: .85rem 1rem;
+    font-size: .9rem;
+    font-weight: 700;
+}
+.login-side {
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    min-height: 320px;
+}
+.login-side::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(rgba(12, 24, 68, .55), rgba(200, 0, 54, .55));
+}
+.login-side .login-side-text {
+    position: absolute; z-index: 2; left: 0; right: 0; bottom: 2rem;
+    color: #fff; text-align: center; padding: 0 2rem;
+}
+
+/* ---------- Tótem ---------- */
+.totem-result { border: 0; }
+.totem-result .totem-title { font-size: 1.75rem; font-weight: 800; letter-spacing: .02em; }
+.totem-photo {
+    width: 110px; height: 110px; object-fit: cover; border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, .85);
+}
+#lector-qr { max-width: 360px; margin-left: auto; margin-right: auto; }
+#input-codigo { font-size: 1.25rem; }
+
+/* ---------- Credencial del socio ---------- */
+.credencial-header {
+    background-color: var(--gym-dark);
+    background-image: linear-gradient(135deg, var(--gym-dark) 0%, var(--gym-primary) 160%);
+    color: #fff;
+    padding: 1.5rem 1rem 3.5rem;
+}
+.credencial-body { margin-top: -3rem; }
+.credencial-qr {
+    background: #fff; border: 1px solid #e3e6f0; border-radius: .5rem;
+    padding: 1rem; display: inline-block;
+}
+
+
+/* ---------- Modo oscuro (se activa con data-theme="dark" en <html>) ---------- */
+[data-theme="dark"] body,
+[data-theme="dark"] #content-wrapper { background-color: #10172e; color: #d6d9e6; }
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .topbar,
+[data-theme="dark"] .sticky-footer,
+[data-theme="dark"] .card,
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark"] .list-group-item { background-color: #18214a !important; color: #d6d9e6; border-color: #27326a; }
+[data-theme="dark"] .card-header { background-color: #1d2756; border-bottom-color: #27326a; }
+[data-theme="dark"] .text-gray-800, [data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .page-title, [data-theme="dark"] h1, [data-theme="dark"] h2,
+[data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5 { color: #eef0fa !important; }
+[data-theme="dark"] .text-gray-600, [data-theme="dark"] .text-muted { color: #9aa3c7 !important; }
+[data-theme="dark"] .table { color: #d6d9e6; }
+[data-theme="dark"] .table td, [data-theme="dark"] .table th,
+[data-theme="dark"] .table thead th { border-color: #27326a; }
+[data-theme="dark"] .thead-light th { background-color: #1d2756; color: #d6d9e6; }
+[data-theme="dark"] .table-hover tbody tr:hover { background-color: #212c61; color: #fff; }
+[data-theme="dark"] .form-control, [data-theme="dark"] select.form-select,
+[data-theme="dark"] .bg-light { background-color: #10172e !important; color: #eef0fa; border-color: #34417f; }
+[data-theme="dark"] .dropdown-item { color: #d6d9e6; }
+[data-theme="dark"] .dropdown-item:hover { background-color: #212c61; }
+[data-theme="dark"] .empty-state { color: #9aa3c7; }
+[data-theme="dark"] .stat-icon { color: #34417f; }
+[data-theme="dark"] .page-link { background-color: #18214a; border-color: #27326a; }
+[data-theme="dark"] .dataTables_wrapper { color: #d6d9e6; }
+[data-theme="dark"] .alert-success { background-color: #123d2e; border-color: #1f6b4f; color: #b9f0d6; }
+[data-theme="dark"] .alert-danger { background-color: #4a1822; border-color: #7d2a39; color: #ffd2da; }
+[data-theme="dark"] .alert-warning { background-color: #4a3d12; border-color: #7a6520; color: #fff0b8; }
+[data-theme="dark"] .alert-info { background-color: #13384a; border-color: #20607d; color: #c9eefb; }
+[data-theme="dark"] .border-left-primary { border-left-color: var(--gym-primary) !important; }
+
+/* El QR NUNCA se invierte: siempre oscuro sobre fondo blanco, también en modo oscuro */
+.credencial-qr, .credencial-qr img {
+    background: #ffffff !important;
+    color: #000000 !important;
+    color-scheme: light;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+}
+.credencial-qr .text-muted { color: #6e707e !important; }
+
+/* ---------- Pantalla móvil del tótem ---------- */
+.totem-modo .btn { font-weight: 700; }
+.totem-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; max-width: 340px; margin: 0 auto; }
+.totem-keypad button { font-size: 1.5rem; padding: .9rem 0; font-weight: 700; }
+#totem-resultado { transition: background-color .15s; }
+#totem-resultado .totem-title { font-size: 1.9rem; }
+.totem-display { font-size: 1.75rem; letter-spacing: .05em; text-align: center; font-weight: 700; }
+.tabla-resumen td, .tabla-resumen th { padding: .45rem .6rem; }
+.perdida { color: #e74a3b !important; }
+@media (max-width: 575.98px) {
+    .container-fluid { padding-left: .75rem; padding-right: .75rem; }
+    .totem-photo { width: 130px; height: 130px; }
+}

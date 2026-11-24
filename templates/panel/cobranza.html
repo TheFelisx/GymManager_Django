@@ -1,0 +1,32 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Cobranza | GymManager Pro{% endblock %}
+{% block page_title %}Cobranza{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-2 mb-sm-0 text-gray-800">Cobranza</h1>
+</div>
+<p class="text-muted">Quién vence en los próximos {{ dias_aviso }} días y quién está atrasado, para cobrar a tiempo.
+Los recordatorios se envían por correo; los pagos en línea y WhatsApp quedan para una etapa posterior.</p>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-warning"><i class="fas fa-hourglass-half mr-1"></i> Vencen esta semana ({{ pag_vencer.paginator.count }})</h6></div>
+            {% include 'partials/cobranza_tabla.html' with pagina=pag_vencer mostrar_venc=True clase_badge='badge-warning' vacio='Nadie vence en los próximos días.' %}
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-danger"><i class="fas fa-exclamation-triangle mr-1"></i> Atrasados ({{ pag_atrasados.paginator.count }})</h6></div>
+            {% include 'partials/cobranza_tabla.html' with pagina=pag_atrasados mostrar_venc=True clase_badge='badge-danger' vacio='No hay socios atrasados.' %}
+        </div>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-secondary"><i class="fas fa-user-clock mr-1"></i> Enrolados que aún no han pagado ({{ pag_sin_pagos.paginator.count }})</h6></div>
+    {% include 'partials/cobranza_tabla.html' with pagina=pag_sin_pagos mostrar_venc=False vacio='Todos los socios activos tienen al menos un pago.' %}
+</div>
+{% endblock %}

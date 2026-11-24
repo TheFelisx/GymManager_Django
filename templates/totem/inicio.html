@@ -1,0 +1,217 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Tótem de acceso | GymManager Pro{% endblock %}
+{% block page_title %}Control de acceso{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-lg-6 mb-4">
+
+        <!-- RESULTADO (se actualiza sin recargar la página) -->
+        <div id="totem-resultado" class="card shadow-lg mb-4 text-center text-white totem-result {% if resultado %}{% if resultado.permitido %}bg-success{% else %}bg-danger{% endif %}{% else %}d-none{% endif %}" aria-live="assertive">
+            <div class="card-body p-4">
+                <img id="res-foto" src="{% if resultado and resultado.socio and resultado.socio.foto %}{{ resultado.socio.foto.url }}{% endif %}" alt="Foto del socio"
+                     class="totem-photo mb-2 {% if not resultado or not resultado.socio or not resultado.socio.foto %}d-none{% endif %}">
+                <div class="totem-title mb-1" id="res-titulo">
+                    {% if resultado %}{% if resultado.permitido %}<i class="fas fa-check-circle"></i> ACCESO PERMITIDO{% else %}<i class="fas fa-ban"></i> ACCESO DENEGADO{% endif %}{% endif %}
+                </div>
+                <h4 class="mb-0" id="res-nombre">{% if resultado.socio %}{{ resultado.socio.usuario.get_full_name }}{% endif %}</h4>
+                <div class="small mb-2" id="res-rut" style="opacity: .85;">{% if resultado.socio %}{{ resultado.socio.rut_formateado }}{% endif %}</div>
+                <div class="p-2 rounded font-weight-bold" id="res-motivo" style="background: rgba(0, 0, 0, .25);">{{ resultado.motivo }}</div>
+                <div class="small mt-2 d-none" id="res-clase"></div>
+                <div class="small mt-2 {% if not resultado.vencimiento %}d-none{% endif %}" id="res-venc">Plan vigente hasta: <strong>{{ resultado.vencimiento|date:"d/m/Y" }}</strong></div>
+            </div>
+        </div>
+
+        {% if bloqueado %}
+            <div class="alert alert-danger"><i class="fas fa-lock"></i> Demasiados intentos con códigos desconocidos. Espera unos minutos antes de volver a intentar.</div>
+        {% endif %}
+
+        <div id="aviso-https" class="alert alert-warning d-none">
+            <i class="fas fa-exclamation-triangle"></i> Esta página no usa HTTPS, por eso el navegador bloqueará la cámara. Ábrela con <strong>https://</strong> para escanear QR.
+        </div>
+
+        <!-- MODO: RUT o QR -->
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-qrcode mr-1"></i> Validar ingreso</h6>
+                <div class="btn-group btn-group-sm totem-modo" role="group" aria-label="Modo de validación">
+                    <button type="button" class="btn btn-outline-primary" id="modo-rut"><i class="fas fa-keyboard"></i> Escribir RUT</button>
+                    <button type="button" class="btn btn-primary" id="modo-qr"><i class="fas fa-camera"></i> Escanear QR</button>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <!-- Panel QR (cámara trasera por defecto, se mantiene abierta) -->
+                <div id="panel-qr">
+                    <div id="lector-qr" class="mb-2 rounded o-hidden"></div>
+                    <div id="estado-camara" class="small text-center text-muted mb-1">Iniciando cámara…</div>
+                    <button type="button" id="btn-reintentar-camara" class="btn btn-outline-secondary btn-sm btn-block d-none"><i class="fas fa-redo"></i> Reintentar cámara</button>
+                </div>
+
+                <!-- Panel RUT con teclado numérico -->
+                <div id="panel-rut" class="d-none">
+                    <form method="post" id="form-totem" autocomplete="off">
+                        {% csrf_token %}
+                        <input type="text" name="codigo" id="input-codigo" class="form-control form-control-lg totem-display mb-3"
+                               placeholder="12.345.678-9" inputmode="none" autocomplete="off" aria-label="RUT del socio">
+                        <div class="totem-keypad mb-3">
+                            {% for n in '123456789' %}<button type="button" class="btn btn-light border" data-tecla="{{ n }}">{{ n }}</button>{% endfor %}
+                            <button type="button" class="btn btn-light border" data-tecla="K">K</button>
+                            <button type="button" class="btn btn-light border" data-tecla="0">0</button>
+                            <button type="button" class="btn btn-light border" data-tecla="borrar" aria-label="Borrar"><i class="fas fa-backspace"></i></button>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg btn-block font-weight-bold" id="btn-validar">Validar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÚLTIMOS MOVIMIENTOS -->
+    <div class="col-12 col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-1"></i> {% if es_guardia %}Mis últimos accesos del turno{% else %}Últimos movimientos en puerta{% endif %}</h6>
+            </div>
+            <ul class="list-group list-group-flush" id="lista-accesos">
+                {% for acc in ultimos_accesos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-weight-bold">{% if acc.socio %}{{ acc.socio.usuario.get_full_name }}{% else %}{{ acc.identificador_ingresado }}{% endif %}</div>
+                            <small class="text-muted">{{ acc.fecha_hora|date:"H:i" }} · {{ acc.motivo }}</small>
+                        </div>
+                        {% if acc.permitido %}<span class="badge badge-success">OK</span>{% else %}<span class="badge badge-danger">NO</span>{% endif %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-center text-muted py-4" id="sin-registros">Sin registros aún.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+(function () {
+    var URL_VALIDAR = "{% url 'totem:validar' %}";
+    var TOKEN = document.querySelector('#form-totem [name=csrfmiddlewaretoken]').value;
+    var input = document.getElementById('input-codigo');
+    var form = document.getElementById('form-totem');
+    var panelQr = document.getElementById('panel-qr');
+    var panelRut = document.getElementById('panel-rut');
+    var btnModoQr = document.getElementById('modo-qr');
+    var btnModoRut = document.getElementById('modo-rut');
+    var estadoCamara = document.getElementById('estado-camara');
+    var btnReintentar = document.getElementById('btn-reintentar-camara');
+    var cajaRes = document.getElementById('totem-resultado');
+    var lector = null, camaraActiva = false, pausado = false, ocupado = false, temporizador = null;
+
+    if (!window.isSecureContext) { document.getElementById('aviso-https').classList.remove('d-none'); }
+
+    function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+    /* ---------- Mostrar resultado ---------- */
+    function mostrar(d) {
+        cajaRes.classList.remove('d-none', 'bg-success', 'bg-danger');
+        cajaRes.classList.add(d.permitido ? 'bg-success' : 'bg-danger');
+        document.getElementById('res-titulo').innerHTML = d.permitido
+            ? '<i class="fas fa-check-circle"></i> ACCESO PERMITIDO' : '<i class="fas fa-ban"></i> ACCESO DENEGADO';
+        document.getElementById('res-nombre').textContent = d.nombre || '';
+        document.getElementById('res-rut').textContent = d.rut || '';
+        document.getElementById('res-motivo').textContent = d.motivo || '';
+        var foto = document.getElementById('res-foto');
+        if (d.foto) { foto.src = d.foto; foto.classList.remove('d-none'); } else { foto.classList.add('d-none'); }
+        var clase = document.getElementById('res-clase');
+        if (d.clase) { clase.textContent = d.clase; clase.classList.remove('d-none'); } else { clase.classList.add('d-none'); }
+        var venc = document.getElementById('res-venc');
+        if (d.vencimiento) { venc.innerHTML = 'Plan vigente hasta: <strong>' + esc(d.vencimiento) + '</strong>'; venc.classList.remove('d-none'); }
+        else { venc.classList.add('d-none'); }
+
+        // Agregar el movimiento a la lista sin recargar
+        if (d.hora && !d.bloqueado) {
+            var sin = document.getElementById('sin-registros'); if (sin) { sin.remove(); }
+            var li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = '<div><div class="font-weight-bold">' + esc(d.nombre || 'Código desconocido') + '</div><small class="text-muted">' +
+                esc(d.hora) + ' · ' + esc(d.motivo) + '</small></div><span class="badge ' + (d.permitido ? 'badge-success">OK' : 'badge-danger">NO') + '</span>';
+            var lista = document.getElementById('lista-accesos');
+            lista.insertBefore(li, lista.firstChild);
+            while (lista.children.length > 8) { lista.removeChild(lista.lastChild); }
+        }
+        // El resultado se limpia solo para dejar listo al siguiente
+        clearTimeout(temporizador);
+        temporizador = setTimeout(function () { cajaRes.classList.add('d-none'); pausado = false; }, 4500);
+    }
+
+    /* ---------- Validación en segundo plano ---------- */
+    function validar(codigo) {
+        if (ocupado || !codigo) { return; }
+        ocupado = true; pausado = true;
+        var datos = new FormData();
+        datos.append('codigo', codigo);
+        datos.append('csrfmiddlewaretoken', TOKEN);
+        fetch(URL_VALIDAR, { method: 'POST', body: datos, credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { return r.json().catch(function () { return { permitido: false, motivo: 'Sesión vencida: vuelve a iniciar sesión.' }; }); })
+            .then(mostrar)
+            .catch(function () { mostrar({ permitido: false, motivo: 'Sin conexión con el servidor. Reintenta o usa la lista impresa.' }); })
+            .then(function () { ocupado = false; input.value = ''; });
+    }
+
+    form.addEventListener('submit', function (e) { e.preventDefault(); validar(input.value.trim()); });
+
+    /* ---------- Teclado numérico (RUT con K) ---------- */
+    document.querySelectorAll('[data-tecla]').forEach(function (b) {
+        b.addEventListener('click', function () {
+            var t = b.getAttribute('data-tecla');
+            input.value = t === 'borrar' ? input.value.slice(0, -1) : (input.value.length < 12 ? input.value + t : input.value);
+        });
+    });
+
+    /* ---------- Cámara: trasera por defecto y siempre abierta ---------- */
+    function iniciarCamara() {
+        if (camaraActiva) { return; }
+        estadoCamara.textContent = 'Iniciando cámara…'; btnReintentar.classList.add('d-none');
+        lector = lector || new Html5Qrcode('lector-qr');
+        lector.start(
+            { facingMode: 'environment' },
+            { fps: 10, qrbox: { width: 230, height: 230 } },
+            function (texto) { if (!pausado) { validar(texto); } },
+            function () { /* sin lectura todavía */ }
+        ).then(function () {
+            camaraActiva = true; estadoCamara.textContent = 'Apunta al QR del socio';
+        }).catch(function () {
+            camaraActiva = false;
+            estadoCamara.textContent = 'No se pudo abrir la cámara. Revisa los permisos y que la página use HTTPS.';
+            btnReintentar.classList.remove('d-none');
+        });
+    }
+    function detenerCamara() {
+        if (lector && camaraActiva) { lector.stop().catch(function () {}); camaraActiva = false; }
+    }
+    btnReintentar.addEventListener('click', iniciarCamara);
+
+    function modoQr() {
+        panelQr.classList.remove('d-none'); panelRut.classList.add('d-none');
+        btnModoQr.className = 'btn btn-primary'; btnModoRut.className = 'btn btn-outline-primary';
+        iniciarCamara();
+    }
+    function modoRut() {
+        panelRut.classList.remove('d-none'); panelQr.classList.add('d-none');
+        btnModoRut.className = 'btn btn-primary'; btnModoQr.className = 'btn btn-outline-primary';
+        detenerCamara();
+    }
+    btnModoQr.addEventListener('click', modoQr);
+    btnModoRut.addEventListener('click', modoRut);
+    window.addEventListener('beforeunload', detenerCamara);
+
+    {% if resultado %}
+    // Resultado del envío clásico (sin JavaScript en segundo plano): limpiar el campo
+    input.value = '';
+    {% endif %}
+    modoQr();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Mi credencial | GymManager Pro{% endblock %}
+{% block page_title %}Mi credencial{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+
+        <!-- Credencial -->
+        <div class="card shadow mb-4 text-center o-hidden">
+            <div class="credencial-header">
+                <div class="small text-uppercase" style="letter-spacing: .1em; opacity: .8;">
+                    <i class="fas fa-dumbbell"></i> GymManager Pro
+                </div>
+            </div>
+            <div class="card-body credencial-body">
+                {% if socio.foto %}
+                    <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-circle border border-white mb-3 object-cover shadow"
+                         style="width: 100px; height: 100px; border-width: 4px !important;">
+                {% else %}
+                    <div class="avatar-circle mb-3 shadow border border-white" style="border-width: 4px !important;">
+                        {{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}
+                    </div>
+                {% endif %}
+
+                <h4 class="font-weight-bold text-gray-900 mb-0">{{ user.get_full_name }}</h4>
+                <p class="text-muted small mb-3">RUT: {{ socio.rut_formateado }}</p>
+
+                {% if pago_vigente %}
+                    <div class="alert alert-success py-2 mb-2">
+                        <div class="font-weight-bold"><i class="fas fa-check-circle"></i> ACTIVO HASTA EL {{ vencimiento|date:"d/m/Y" }}</div>
+                        <div class="small">{{ plan.nombre }}</div>
+                    </div>
+                    {% if vence_pronto %}
+                        <div class="alert alert-warning py-2 mb-3 small">
+                            <i class="fas fa-bell"></i>
+                            {% if dias_para_vencer == 0 %}Tu membresía vence hoy.{% elif dias_para_vencer == 1 %}Tu membresía vence mañana.{% else %}Tu membresía vence en {{ dias_para_vencer }} días.{% endif %}
+                            Renueva en recepción para no perder el acceso.
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-danger py-2 mb-3">
+                        <div class="font-weight-bold"><i class="fas fa-times-circle"></i> VENCIDO</div>
+                        <div class="small">{% if vencimiento %}Tu membresía venció el {{ vencimiento|date:"d/m/Y" }}. {% endif %}Acércate a recepción para renovarla.</div>
+                    </div>
+                {% endif %}
+
+                <div class="credencial-qr">
+                    {% if socio.imagen_qr %}
+                        <img src="{{ socio.imagen_qr.url }}?v={{ socio.token_qr|stringformat:'s'|slice:':8' }}" alt="Código QR de acceso" class="img-fluid" style="max-width: 280px; width: 100%;">
+                    {% else %}
+                        <div class="text-muted small py-4 px-3"><i class="fas fa-qrcode fa-2x d-block mb-2"></i>Tu QR aún no está disponible.</div>
+                    {% endif %}
+                    <div class="small text-muted mt-1">Muestra este QR al guardia para ingresar</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clases -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-calendar-check mr-1"></i> Mis clases</h6></div>
+            <div class="card-body">
+                {% if proxima_clase %}
+                    <div class="font-weight-bold">{{ proxima_clase.sesion.clase.nombre }}</div>
+                    <div class="small text-muted mb-2">{{ proxima_clase.sesion.fecha|date:"l d/m" }} · {{ proxima_clase.sesion.hora_inicio|time:"H:i" }} · {{ proxima_clase.sesion.clase.sala.nombre }}</div>
+                {% else %}
+                    <p class="small text-muted">No tienes clases reservadas.</p>
+                {% endif %}
+                <a href="{% url 'reservas:mis_clases' %}" class="btn btn-primary btn-sm">Reservar o ver mis clases</a>
+            </div>
+        </div>
+
+        <!-- Mi plan y horario -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-clipboard-list mr-1"></i> Mi plan y horario</h6></div>
+            <div class="card-body">
+                {% if plan %}
+                    <div class="font-weight-bold">{{ plan.nombre }}</div>
+                    <div class="small text-muted mb-2">Vigente del {{ pago_vigente.fecha_inicio|date:"d/m/Y" }} al {{ pago_vigente.fecha_vencimiento|date:"d/m/Y" }}</div>
+                    <div><i class="fas fa-clock text-primary mr-1"></i> {{ plan.resumen_horario }}</div>
+                    <div><i class="fas fa-dumbbell text-primary mr-1"></i> {{ plan.resumen_clases }}</div>
+                {% else %}
+                    <p class="text-muted small mb-0">No tienes un plan vigente en este momento.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pagos -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-receipt mr-1"></i> Mis pagos</h6></div>
+            <ul class="list-group list-group-flush">
+                {% for pago in historial_pagos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-weight-bold">{{ pago.plan.nombre }}{% if pago.anulado %} <span class="badge badge-secondary">Anulado</span>{% endif %}</div>
+                            <small class="text-muted">{{ pago.fecha_inicio|date:"d/m/Y" }} al {{ pago.fecha_vencimiento|date:"d/m/Y" }}</small>
+                        </div>
+                        <span class="badge badge-primary badge-pill">${{ pago.monto_pagado|floatformat:"0g" }}</span>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-center text-muted small py-4">Aún no tienes pagos registrados.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="text-center mb-4">
+            <a href="{% url 'panel:mi_perfil' %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-user-edit"></i> Mi perfil</a>
+            <a href="{% url 'cuentas:cambiar_clave' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-key"></i> Cambiar contraseña</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

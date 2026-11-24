@@ -1,0 +1,263 @@
+{% extends 'base_panel.html' %}
+{% load l10n static %}
+
+{% block title %}Finanzas | GymManager Pro{% endblock %}
+{% block page_title %}Finanzas{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-2 mb-sm-0 text-gray-800">Balance financiero</h1>
+    <a href="{% url 'finanzas:registrar_gasto' %}" class="btn btn-danger btn-sm btn-icon-split">
+        <span class="icon text-white-50"><i class="fas fa-minus-circle"></i></span>
+        <span class="text">Registrar gasto</span>
+    </a>
+</div>
+
+<!-- SELECTOR DE MES Y FILTRO DE FECHAS -->
+<div class="card shadow mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="mb-2">
+            <div class="form-row align-items-end">
+                <div class="col-12 col-md-5 mb-2 mb-md-0">
+                    <label class="small font-weight-bold text-gray-800 mb-1">Mes</label>
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend"><a class="btn btn-outline-secondary" href="?mes={{ mes_anterior }}" title="Mes anterior"><i class="fas fa-chevron-left"></i></a></div>
+                        <input type="month" name="mes" value="{{ mes_valor }}" class="form-control" onchange="this.form.submit()">
+                        <div class="input-group-append"><a class="btn btn-outline-secondary" href="?mes={{ mes_siguiente }}" title="Mes siguiente"><i class="fas fa-chevron-right"></i></a></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <form method="get">
+            <div class="form-row align-items-end">
+                <div class="form-group col-12 col-sm-4 mb-2 mb-sm-0">
+                    <label class="small font-weight-bold text-gray-800 mb-1">Desde</label>
+                    <input type="date" name="desde" value="{{ fecha_desde }}" class="form-control form-control-sm">
+                </div>
+                <div class="form-group col-12 col-sm-4 mb-2 mb-sm-0">
+                    <label class="small font-weight-bold text-gray-800 mb-1">Hasta</label>
+                    <input type="date" name="hasta" value="{{ fecha_hasta }}" class="form-control form-control-sm">
+                </div>
+                <div class="form-group col-12 col-sm-4 mb-0">
+                    <button type="submit" class="btn btn-dark btn-sm btn-block"><i class="fas fa-filter"></i> Rango libre</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- RESUMEN -->
+<div class="row">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total ingresos</div>
+                        <div class="h4 mb-0 font-weight-bold text-gray-800">${{ total_ingresos|floatformat:"0g" }}</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-arrow-circle-up stat-icon"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Total gastos</div>
+                        <div class="h4 mb-0 font-weight-bold text-gray-800">${{ total_gastos|floatformat:"0g" }}</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-arrow-circle-down stat-icon"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-12 mb-4">
+        <div class="card {% if ganancia_neta >= 0 %}border-left-primary{% else %}border-left-danger{% endif %} shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold {% if ganancia_neta >= 0 %}text-primary{% else %}perdida{% endif %} text-uppercase mb-1">{% if ganancia_neta >= 0 %}Ganancia neta{% else %}Pérdida del período{% endif %}</div>
+                        <div class="h4 mb-0 font-weight-bold {% if ganancia_neta < 0 %}perdida{% else %}text-gray-800{% endif %}">{% if ganancia_neta < 0 %}-${{ ganancia_neta|cut:"-"|floatformat:"0g" }}{% else %}${{ ganancia_neta|floatformat:"0g" }}{% endif %}</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-balance-scale stat-icon"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GRÁFICOS -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Ingresos vs. gastos del período</h6></div>
+            <div class="card-body"><div style="height: 260px; position: relative;"><canvas id="graficoBalance"></canvas></div></div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Ingresos por método</h6></div>
+            <div class="card-body">
+                {% if por_metodo %}<div style="height: 260px; position: relative;"><canvas id="graficoMetodo"></canvas></div>
+                {% else %}<div class="empty-state"><i class="fas fa-chart-pie"></i>Sin ingresos.</div>{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-danger">Gastos por categoría</h6></div>
+            <div class="card-body">
+                {% if por_categoria %}<div style="height: 260px; position: relative;"><canvas id="graficoCategoria"></canvas></div>
+                {% else %}<div class="empty-state"><i class="fas fa-chart-pie"></i>Sin gastos.</div>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DESGLOSES -->
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-success">Ingresos por plan</h6></div>
+            <table class="table tabla-resumen mb-0">
+                <tbody>
+                    {% for f in por_plan %}<tr><td>{{ f.plan__nombre }} <small class="text-muted">({{ f.n }})</small></td><td class="text-right font-weight-bold">${{ f.total|floatformat:"0g" }}</td></tr>
+                    {% empty %}<tr><td class="text-muted text-center py-3">Sin ingresos.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-success">Ingresos por método de pago</h6></div>
+            <table class="table tabla-resumen mb-0">
+                <tbody>
+                    {% for f in por_metodo %}<tr><td>{{ f.metodo }} <small class="text-muted">({{ f.n }})</small></td><td class="text-right font-weight-bold">${{ f.total|floatformat:"0g" }}</td></tr>
+                    {% empty %}<tr><td class="text-muted text-center py-3">Sin ingresos.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+            <div class="card-footer small text-muted">Por origen: {% for o in por_origen %}{{ o.origen }} ${{ o.total|floatformat:"0g" }}{% if not forloop.last %} · {% endif %}{% endfor %}.</div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-danger">Gastos por categoría</h6></div>
+            <table class="table tabla-resumen mb-0">
+                <tbody>
+                    {% for f in por_categoria %}<tr><td>{{ f.categoria }} <small class="text-muted">({{ f.n }})</small></td><td class="text-right font-weight-bold">${{ f.total|floatformat:"0g" }}</td></tr>
+                    {% empty %}<tr><td class="text-muted text-center py-3">Sin gastos.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- TABLAS -->
+<div class="row">
+    <div class="col-12 col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-success">Ingresos del período (pagos)</h6>
+            </div>
+            {% if pag_ingresos %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="thead-light">
+                            <tr><th>Fecha</th><th>Socio / plan</th><th class="text-right">Monto</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for p in pag_ingresos %}
+                                <tr>
+                                    <td>{{ p.fecha_pago|date:"d/m/Y" }}</td>
+                                    <td>{{ p.socio.usuario.get_full_name }}<br><small class="text-muted">{{ p.plan.nombre }}</small></td>
+                                    <td class="text-right font-weight-bold text-success">+${{ p.monto_pagado|floatformat:"0g" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% with pagina=pag_ingresos %}{% include 'partials/paginacion.html' %}{% endwith %}
+            {% else %}
+                <div class="empty-state"><i class="fas fa-receipt"></i>Sin ingresos en estas fechas.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">Gastos del período</h6>
+            </div>
+            {% if pag_gastos %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="thead-light">
+                            <tr><th>Fecha</th><th>Concepto</th><th class="text-right">Monto</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for g in pag_gastos %}
+                                <tr>
+                                    <td>{{ g.fecha|date:"d/m/Y" }}</td>
+                                    <td>{{ g.concepto }}<br><small class="text-muted">{{ g.get_categoria_display }}</small></td>
+                                    <td class="text-right font-weight-bold text-danger">-${{ g.monto|floatformat:"0g" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% with pagina=pag_gastos %}{% include 'partials/paginacion.html' %}{% endwith %}
+            {% else %}
+                <div class="empty-state"><i class="fas fa-file-invoice-dollar"></i>Sin gastos registrados en estas fechas.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>
+<script>
+    (function () {
+        var ingresos = {{ total_ingresos|unlocalize }};
+        var gastos = {{ total_gastos|unlocalize }};
+        var ganancia = {{ ganancia_neta|unlocalize }};
+        var colores = ['#0C1844', '#C80036', '#1cc88a', '#f6c23e', '#36b9cc', '#858796'];
+
+        function pesos(v) { return '$' + Number(v).toLocaleString('es-CL'); }
+
+        var balance = document.getElementById('graficoBalance');
+        if (balance) {
+            new Chart(balance, {
+                type: 'bar',
+                data: {
+                    labels: ['Ingresos', 'Gastos', ganancia >= 0 ? 'Ganancia neta' : 'Pérdida'],
+                    datasets: [{ data: [ingresos, gastos, ganancia], backgroundColor: ['#1cc88a', '#e74a3b', ganancia >= 0 ? '#0C1844' : '#e74a3b'] }]
+                },
+                options: {
+                    maintainAspectRatio: false, legend: { display: false },
+                    scales: { yAxes: [{ ticks: { beginAtZero: true, callback: pesos } }], xAxes: [{ gridLines: { display: false }, maxBarThickness: 90 }] },
+                    tooltips: { callbacks: { label: function (item) { return pesos(item.yLabel); } } }
+                }
+            });
+        }
+
+        function torta(id, etiquetas, valores) {
+            var el = document.getElementById(id);
+            if (!el || !valores.length) { return; }
+            new Chart(el, {
+                type: 'doughnut',
+                data: { labels: etiquetas, datasets: [{ data: valores, backgroundColor: colores }] },
+                options: {
+                    maintainAspectRatio: false, legend: { position: 'bottom', labels: { boxWidth: 12 } },
+                    tooltips: { callbacks: { label: function (item, data) { return data.labels[item.index] + ': ' + pesos(data.datasets[0].data[item.index]); } } }
+                }
+            });
+        }
+        torta('graficoMetodo', {{ graf_metodo_etiquetas|safe }}, {{ graf_metodo_valores|safe }});
+        torta('graficoCategoria', {{ graf_categoria_etiquetas|safe }}, {{ graf_categoria_valores|safe }});
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Mi agenda | GymManager Pro{% endblock %}
+{% block page_title %}Mi agenda{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center"><div class="col-12 col-lg-8">
+    <h1 class="h3 mb-3 text-gray-800">Mis clases</h1>
+    {% if pendientes %}<div class="alert alert-info">Tienes {{ pendientes }} solicitud{{ pendientes|pluralize:"es" }} de cambio pendiente{{ pendientes|pluralize }}.</div>{% endif %}
+    {% for fecha, sesiones in dias %}
+        <div class="card shadow mb-3">
+            <div class="card-header py-2"><strong class="text-capitalize">{{ fecha|date:"l d \d\e F" }}</strong></div>
+            <ul class="list-group list-group-flush">
+                {% for s in sesiones %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-weight-bold">{{ s.hora_inicio|time:"H:i" }} · {{ s.clase.nombre }}
+                                {% if s.cancelada %}<span class="badge badge-danger">Cancelada</span>{% elif s.cerrada %}<span class="badge badge-dark">Cerrada</span>{% endif %}
+                                {% if s.instructor %}<span class="badge badge-info">suplente</span>{% endif %}</div>
+                            <small class="text-muted">{{ s.clase.sala.nombre }} · {{ s.ocupados }}/{{ s.cupo_total }} inscritos</small>
+                        </div>
+                        <a href="{% url 'reservas:sesion_instructor' s.pk %}" class="btn btn-outline-primary btn-sm">Abrir</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% empty %}
+        <div class="empty-state"><i class="fas fa-calendar-times"></i>No tienes clases asignadas en estos días.</div>
+    {% endfor %}
+</div></div>
+{% endblock %}

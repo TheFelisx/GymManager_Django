@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Verifica tu correo | {{ gym.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 560px;">
+    <h2 class="mb-3">Reservar como visitante</h2>
+    <p class="text-muted">No necesitas cuenta. Te enviamos un código de 6 dígitos a tu correo para confirmar que es tuyo.</p>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% include 'partials/campos_form.html' %}
+        <button type="submit" class="btn btn-primary">Enviarme el código</button>
+        <a href="{% url 'reservas:horario' %}" class="btn btn-outline-secondary">Volver</a>
+    </form>
+</div>
+{% endblock %}

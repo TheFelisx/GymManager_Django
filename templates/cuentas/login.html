@@ -1,0 +1,65 @@
+{% extends 'base_sb.html' %}
+{% load static %}
+
+{% block title %}Iniciar sesión | GymManager Pro{% endblock %}
+{% block body_class %}bg-gym-login{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12 col-md-9">
+
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <div class="row no-gutters">
+
+                        <div class="col-lg-6 d-none d-lg-block login-side"
+                             style="background-image: url('{% static 'img/header-1.jpg' %}');">
+                            <div class="login-side-text">
+                                <i class="fas fa-dumbbell fa-3x mb-3"></i>
+                                <h2 class="font-weight-bold">GymManager Pro</h2>
+                                <p class="mb-0">Administración, accesos y membresías en un solo lugar.</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-1">¡Bienvenido!</h1>
+                                    <p class="text-muted small mb-4">Ingresa con tu RUT o usuario</p>
+                                </div>
+
+                                {% include 'partials/mensajes.html' %}
+
+                                <form method="post" class="form-user" novalidate>
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        {{ form.username }}
+                                        {% for error in form.username.errors %}
+                                            <div class="text-danger small mt-1 ml-3">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.password }}
+                                        {% for error in form.password.errors %}
+                                            <div class="text-danger small mt-1 ml-3">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">Ingresar</button>
+                                </form>
+
+                                <hr>
+                                <div class="text-center">
+                                    <a class="small" href="{% url 'publica:inicio' %}"><i class="fas fa-arrow-left"></i> Volver al sitio</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

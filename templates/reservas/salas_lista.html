@@ -1,0 +1,36 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Salas | GymManager Pro{% endblock %}
+{% block page_title %}Salas{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-2 mb-sm-0 text-gray-800">Salas del gimnasio</h1>
+    {% if puede_admin %}
+        <div>
+            <a href="{% url 'reservas:editar_tarifas' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-tags"></i> Tarifas de visitantes</a>
+            <a href="{% url 'reservas:crear_sala' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Nueva sala</a>
+        </div>
+    {% endif %}
+</div>
+<div class="row">
+    {% for sala in pagina %}
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card shadow h-100 {% if not sala.activa %}opacity-50{% endif %}">
+                {% if sala.foto %}<img src="{{ sala.foto.url }}" class="card-img-top" alt="{{ sala.nombre }}" style="height: 170px; object-fit: cover;">{% endif %}
+                <div class="card-body">
+                    <h5 class="font-weight-bold">{{ sala.nombre }} {% if not sala.activa %}<span class="badge badge-secondary">Inactiva</span>{% endif %}</h5>
+                    <div class="small text-muted mb-2">Capacidad {{ sala.capacidad }}</div>
+                    <div class="font-weight-bold text-success mb-2">${{ sala.precio_hora|floatformat:"0g" }} por hora{% if sala.precio_hora_punta %} <span class="small text-muted font-weight-normal">· ${{ sala.precio_hora_punta|floatformat:"0g" }} en hora punta</span>{% endif %}</div>
+                    {% if sala.descripcion %}<p class="small">{{ sala.descripcion|truncatechars:140 }}</p>{% endif %}
+                    {% if puede_admin %}<a href="{% url 'reservas:editar_sala' sala.pk %}" class="btn btn-outline-primary btn-sm">Editar</a>{% endif %}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12"><div class="empty-state"><i class="fas fa-door-closed"></i>Aún no hay salas creadas.</div></div>
+    {% endfor %}
+</div>
+{% include 'partials/paginacion.html' %}
+<p class="small text-muted">Las salas nunca se borran: se desactivan. Una sala inactiva no se puede reservar.</p>
+{% endblock %}

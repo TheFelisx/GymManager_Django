@@ -1,0 +1,82 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Reservas de sala | GymManager Pro{% endblock %}
+{% block page_title %}Reservas de sala{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-2 mb-sm-0 text-gray-800">Reservas de sala</h1>
+    <a href="{% url 'reservas:reservar_sala' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Reservar sala</a>
+</div>
+
+{% if pag_pendientes %}
+<div class="card shadow mb-4 border-left-warning">
+    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-warning"><i class="fas fa-bell"></i> Solicitudes de visitantes por revisar ({{ pag_pendientes.paginator.count }})</h6></div>
+    <ul class="list-group list-group-flush">
+        {% for r in pag_pendientes %}
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between flex-wrap">
+                    <div>
+                        <strong>{{ r.sala.nombre }}</strong> · {{ r.fecha|date:"d/m/Y" }} {{ r.hora_inicio|time:"H:i" }}–{{ r.hora_fin|time:"H:i" }} · {{ r.personas }} persona{{ r.personas|pluralize }}<br>
+                        <small class="text-muted">{{ r.visitante.nombre }} · {{ r.visitante.email }} · {{ r.visitante.telefono }} · {{ r.motivo }} · ${{ r.precio|floatformat:"0g" }}</small>
+                    </div>
+                    {% if puede_admin %}
+                        <div class="mt-2 mt-sm-0">
+                            <form method="post" action="{% url 'reservas:aprobar_reserva' r.pk %}" class="d-inline">{% csrf_token %}<button class="btn btn-success btn-sm">Aprobar</button></form>
+                            <form method="post" action="{% url 'reservas:rechazar_reserva' r.pk %}" class="d-inline form-inline">{% csrf_token %}
+                                <input type="text" name="nota" class="form-control form-control-sm" placeholder="Motivo (opcional)">
+                                <button class="btn btn-outline-danger btn-sm ml-1">Rechazar</button></form>
+                        </div>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    {% with pagina=pag_pendientes %}{% include 'partials/paginacion.html' %}{% endwith %}
+</div>
+{% endif %}
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Próximas reservas</h6></div>
+    {% if pagina %}
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="thead-light"><tr><th>Fecha</th><th>Sala</th><th>Quién / motivo</th><th>Estado</th><th>Pago</th><th></th></tr></thead>
+                <tbody>
+                    {% for r in pagina %}
+                        <tr {% if not r.activa %}class="text-muted"{% endif %}>
+                            <td>{{ r.fecha|date:"d/m/Y" }}<br><small>{{ r.hora_inicio|time:"H:i" }}–{{ r.hora_fin|time:"H:i" }}</small></td>
+                            <td>{{ r.sala.nombre }}</td>
+                            <td>{% if r.visitante %}{{ r.visitante.nombre }}<br>{% endif %}<small>{{ r.motivo }}</small></td>
+                            <td><span class="badge {% if r.estado == 'APROBADA' %}badge-success{% elif r.estado == 'SOLICITADA' %}badge-warning{% else %}badge-secondary{% endif %}">{{ r.get_estado_display }}</span>
+                                {% if r.nota %}<br><small>{{ r.nota }}</small>{% endif %}</td>
+                            <td class="small">
+                                {% if r.estado == 'APROBADA' and r.precio > 0 %}
+                                    {% if r.pagada %}Pagada ${{ r.monto_pagado|floatformat:"0g" }}{% else %}
+                                        ${{ r.monto_pagado|floatformat:"0g" }} de ${{ r.precio|floatformat:"0g" }}
+                                        <form method="post" action="{% url 'reservas:cobrar_reserva' r.pk %}" class="form-inline mt-1">
+                                            {% csrf_token %}
+                                            <select name="metodo" class="form-select form-select-sm mr-1">{% for v, n in form_pago.fields.metodo.choices %}<option value="{{ v }}">{{ n }}</option>{% endfor %}</select>
+                                            <button class="btn btn-success btn-sm" title="Se cobra el precio completo del arriendo">Cobrar ${{ r.precio|floatformat:"0g" }}</button>
+                                        </form>
+                                    {% endif %}
+                                {% else %}—{% endif %}
+                                {% if r.visitante and r.estado == 'APROBADA' %}<br><a href="{% url 'reservas:qr_visita' 'sala' r.pk %}" class="small"><i class="fas fa-qrcode"></i> Ver QR de acceso</a>{% endif %}
+                            </td>
+                            <td class="text-right">
+                                {% if r.activa %}
+                                    <form method="post" action="{% url 'reservas:cancelar_reserva' r.pk %}" onsubmit="return confirm('¿Cancelar esta reserva?');">{% csrf_token %}<button class="btn btn-outline-danger btn-sm">Cancelar</button></form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'partials/paginacion.html' %}
+    {% else %}
+        <div class="empty-state"><i class="fas fa-door-open"></i>No hay reservas próximas.</div>
+    {% endif %}
+</div>
+<p class="small text-muted">Los pagos en línea no están habilitados: el cobro de visitantes se registra aquí, en recepción.</p>
+{% endblock %}

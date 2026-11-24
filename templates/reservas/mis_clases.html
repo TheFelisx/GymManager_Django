@@ -1,0 +1,87 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Mis clases | GymManager Pro{% endblock %}
+{% block page_title %}Mis clases{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        {% if bloqueado_hasta %}
+            <div class="alert alert-danger"><i class="fas fa-ban"></i> Tus reservas están bloqueadas hasta el {{ bloqueado_hasta|date:"d/m/Y" }} por inasistencias (3 faltas en 30 días).</div>
+        {% endif %}
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-calendar-check mr-1"></i> Mis reservas (máx. {{ max_reservas }} activas)</h6></div>
+            <ul class="list-group list-group-flush">
+                {% for i in proximas %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-weight-bold">{{ i.sesion.clase.nombre }}</div>
+                            <small class="text-muted">{{ i.sesion.fecha|date:"D d/m" }} · {{ i.sesion.hora_inicio|time:"H:i" }} · {{ i.sesion.clase.sala.nombre }}</small>
+                        </div>
+                        <span class="badge {% if i.estado == 'CONFIRMADA' %}badge-success{% else %}badge-warning{% endif %}">{{ i.get_estado_display }}</span>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-center text-muted small py-4">No tienes reservas activas.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <h5 class="text-gray-800 mb-3">Clases de los próximos días</h5>
+        {% for fecha, sesiones in dias %}
+            <div class="card shadow mb-3">
+                <div class="card-header py-2"><strong class="text-capitalize">{{ fecha|date:"l d \d\e F" }}</strong></div>
+                <ul class="list-group list-group-flush">
+                    {% for s in sesiones %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="font-weight-bold">{{ s.hora_inicio|time:"H:i" }} · {{ s.clase.nombre }}</div>
+                                    <small class="text-muted">{{ s.clase.sala.nombre }}{% if s.instructor_efectivo %} · {{ s.instructor_efectivo.get_full_name|default:s.instructor_efectivo.username }}{% endif %} · {{ s.clase.duracion_min }} min</small><br>
+                                    <small class="{% if s.libres_socio > 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {% if s.libres_socio > 0 %}{{ s.libres_socio }} cupo{{ s.libres_socio|pluralize }} libre{{ s.libres_socio|pluralize }}{% else %}Llena{% if s.en_espera %} · {{ s.en_espera }} en espera{% endif %}{% endif %}
+                                    </small>
+                                </div>
+                                <div class="text-right">
+                                    {% if s.mi_inscripcion %}
+                                        <span class="badge {% if s.mi_inscripcion.estado == 'CONFIRMADA' %}badge-success{% else %}badge-warning{% endif %} mb-1">{{ s.mi_inscripcion.get_estado_display }}</span><br>
+                                        {% if s.puede_cancelar %}
+                                            <form method="post" action="{% url 'reservas:socio_cancelar' s.mi_inscripcion.pk %}" onsubmit="return confirm('¿Cancelar tu reserva?');">
+                                                {% csrf_token %}<button class="btn btn-outline-danger btn-sm">Cancelar</button>
+                                            </form>
+                                        {% else %}<small class="text-muted">Ya no se puede cancelar</small>{% endif %}
+                                    {% else %}
+                                        <form method="post" action="{% url 'reservas:socio_inscribirse' s.pk %}">
+                                            {% csrf_token %}
+                                            <button class="btn {% if s.libres_socio > 0 %}btn-primary{% else %}btn-outline-warning{% endif %} btn-sm">
+                                                {% if s.libres_socio > 0 %}Inscribirme{% else %}Lista de espera{% endif %}
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% empty %}
+            <div class="empty-state"><i class="fas fa-calendar-times"></i>No hay clases programadas en los próximos días.</div>
+        {% endfor %}
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-1"></i> Mi historial de clases</h6></div>
+            <ul class="list-group list-group-flush">
+                {% for i in historial %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div><div class="font-weight-bold">{{ i.sesion.clase.nombre }}</div><small class="text-muted">{{ i.sesion.fecha|date:"d/m/Y" }} {{ i.sesion.hora_inicio|time:"H:i" }}</small></div>
+                        <span class="badge {% if i.estado == 'ASISTIO' %}badge-success{% elif i.estado == 'NO_ASISTIO' %}badge-danger{% else %}badge-secondary{% endif %}">{{ i.get_estado_display }}</span>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-center text-muted small py-4">Aún no tienes historial.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <p class="small text-muted">Reglas: reservas hasta {{ 7 }} días antes · cancelas hasta 2 horas antes · si no vas 3 veces en 30 días, se bloquean tus reservas por 7 días.</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends 'base_panel.html' %}
+{% load static %}
+
+{% block title %}{{ socio.usuario.get_full_name }} | GymManager Pro{% endblock %}
+{% block page_title %}Socios{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-2 mb-sm-0 text-gray-800">{{ socio.usuario.get_full_name }}</h1>
+    <a href="{% url 'panel:lista_socios' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> Volver a socios</a>
+</div>
+
+<div class="row">
+    <!-- Ficha -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow text-center">
+            <div class="card-body">
+                {% if socio.foto %}
+                    <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-circle object-cover mb-3 shadow" style="width: 120px; height: 120px;">
+                {% else %}
+                    <div class="avatar-circle mb-3">{{ socio.usuario.first_name|slice:":1" }}{{ socio.usuario.last_name|slice:":1" }}</div>
+                {% endif %}
+                <h5 class="font-weight-bold mb-0">{{ socio.usuario.get_full_name }}</h5>
+                <div class="text-muted small mb-2">{{ socio.rut_formateado }}</div>
+
+                {% if not socio.usuario.is_active %}
+                    <span class="badge badge-dark mb-2">De baja</span>
+                    {% if socio.motivo_baja %}<div class="small text-muted">Motivo: {{ socio.motivo_baja }}<br>{{ socio.fecha_baja|date:"d/m/Y" }}</div>{% endif %}
+                {% elif socio.vigente %}
+                    <span class="badge badge-success mb-2">Vigente hasta {{ socio.ultimo_venc|date:"d/m/Y" }}</span>
+                {% else %}
+                    <span class="badge badge-danger mb-2">Vencida / sin plan</span>
+                {% endif %}
+
+                <hr>
+                <div class="text-left small">
+                    <div><i class="fas fa-phone fa-fw text-gray-500"></i> {{ socio.telefono }}</div>
+                    <div><i class="fas fa-envelope fa-fw text-gray-500"></i> {{ socio.usuario.email|default:"Sin correo" }}</div>
+                    <div><i class="fas fa-birthday-cake fa-fw text-gray-500"></i> {{ socio.fecha_nacimiento|date:"d/m/Y" }}</div>
+                    <div><i class="fas fa-calendar-plus fa-fw text-gray-500"></i> Socio desde {{ socio.fecha_registro|date:"d/m/Y" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow mt-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Acciones</h6></div>
+            <div class="card-body">
+                <a href="{% url 'panel:editar_socio' socio.pk %}" class="btn btn-outline-primary btn-block mb-2"><i class="fas fa-edit"></i> Editar datos y foto</a>
+                {% if socio.usuario.is_active %}
+                    <a href="{% url 'panel:registrar_pago' %}?socio={{ socio.pk }}" class="btn btn-success btn-block mb-2"><i class="fas fa-cash-register"></i> Registrar pago</a>
+                {% endif %}
+
+                <form method="post" action="{% url 'panel:regenerar_qr' socio.pk %}" class="mb-2"
+                      onsubmit="return confirm('Se generará un QR nuevo y el actual dejará de servir. ¿Continuar?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-dark btn-block"><i class="fas fa-qrcode"></i> Regenerar QR</button>
+                </form>
+                <form method="post" action="{% url 'panel:restablecer_clave_socio' socio.pk %}" class="mb-2"
+                      onsubmit="return confirm('Se asignará una clave temporal y se cerrarán sus sesiones. ¿Continuar?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-dark btn-block"><i class="fas fa-key"></i> Restablecer clave</button>
+                </form>
+
+                {% if socio.usuario.is_active %}
+                    <a href="{% url 'panel:baja_socio' socio.pk %}" class="btn btn-outline-danger btn-block"><i class="fas fa-user-slash"></i> Dar de baja</a>
+                {% else %}
+                    <form method="post" action="{% url 'panel:reactivar_socio' socio.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-block"><i class="fas fa-user-check"></i> Reactivar socio</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagos y accesos -->
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-receipt mr-1"></i> Pagos</h6></div>
+            {% if pagos %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="thead-light"><tr><th>Fecha</th><th>Plan</th><th>Método</th><th>Vigencia</th><th class="text-right">Monto</th></tr></thead>
+                        <tbody>
+                            {% for p in pagos %}
+                                <tr {% if p.anulado %}class="text-muted"{% endif %}>
+                                    <td>{{ p.fecha_pago|date:"d/m/Y" }}</td>
+                                    <td>{{ p.plan.nombre }}{% if p.anulado %} <span class="badge badge-secondary">Anulado</span>{% endif %}</td>
+                                    <td>{{ p.get_metodo_pago_display }}</td>
+                                    <td>{{ p.fecha_inicio|date:"d/m" }} – {{ p.fecha_vencimiento|date:"d/m/Y" }}</td>
+                                    <td class="text-right font-weight-bold">{% if p.anulado %}<s>${{ p.monto_pagado|floatformat:"0g" }}</s>{% else %}${{ p.monto_pagado|floatformat:"0g" }}{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state"><i class="fas fa-receipt"></i>Aún no tiene pagos.</div>
+            {% endif %}
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-1"></i> Últimos accesos</h6></div>
+            <ul class="list-group list-group-flush">
+                {% for a in accesos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small font-weight-bold">{{ a.fecha_hora|date:"d/m/Y H:i" }} · {{ a.get_metodo_display }}</div>
+                            <small class="text-muted">{{ a.motivo }}</small>
+                        </div>
+                        {% if a.permitido %}<span class="badge badge-success">OK</span>{% else %}<span class="badge badge-danger">NO</span>{% endif %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-center text-muted small py-4">Sin accesos registrados.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

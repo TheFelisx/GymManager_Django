@@ -1,0 +1,40 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Sesiones de {{ clase.nombre }} | GymManager Pro{% endblock %}
+{% block page_title %}Sesiones de la clase{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-gray-800">{{ clase.nombre }}</h1>
+        <div class="text-muted">{{ clase.resumen_horario }} · {{ clase.sala.nombre }} · {{ clase.instructor.get_full_name|default:clase.instructor.username|default:"Sin instructor" }}</div>
+    </div>
+    <a href="{% url 'reservas:lista_clases' %}" class="btn btn-outline-secondary btn-sm mt-2 mt-sm-0"><i class="fas fa-arrow-left"></i> Volver a clases</a>
+</div>
+<div class="card shadow mb-4">
+    {% if pagina %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="thead-light"><tr><th>Fecha</th><th>Hora</th><th>Inscritos</th><th></th></tr></thead>
+                <tbody>
+                    {% for s in pagina %}
+                        <tr>
+                            <td class="font-weight-bold text-capitalize">{{ s.fecha|date:"l d/m/Y" }}</td>
+                            <td>{{ s.hora_inicio|time:"H:i" }}–{{ s.hora_fin|time:"H:i" }}</td>
+                            <td>{{ s.ocupados }} / {{ s.cupo_total }}{% if s.en_espera %} <small class="text-muted">(+{{ s.en_espera }} en espera)</small>{% endif %}
+                                {% if s.cancelada %}<span class="badge badge-danger">Cancelada</span>{% endif %}</td>
+                            <td class="text-right text-nowrap">
+                                <a href="{% url 'reservas:sesion_detalle' s.pk %}#inscritos" class="btn btn-outline-primary btn-sm"><i class="fas fa-users"></i> Ver gente</a>
+                                {% if not s.cancelada %}<a href="{% url 'reservas:sesion_detalle' s.pk %}#agregar" class="btn btn-success btn-sm"><i class="fas fa-user-plus"></i> Agregar gente</a>{% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'partials/paginacion.html' %}
+    {% else %}
+        <div class="empty-state"><i class="fas fa-calendar-times"></i>Esta clase no tiene sesiones próximas.</div>
+    {% endif %}
+</div>
+{% endblock %}

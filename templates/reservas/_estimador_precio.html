@@ -1,0 +1,30 @@
+<script>
+/* Calcula el precio de la sala por horas (tramos de 30 min, con valor de hora punta) antes de reservar. */
+(function () {
+    var DATOS = {{ precios|safe }};
+    var p = "{{ prefijo_campos }}";
+    var sala = document.getElementById('id_' + p + 'sala');
+    var fecha = document.getElementById('id_' + p + 'fecha');
+    var ini = document.getElementById('id_' + p + 'hora_inicio');
+    var fin = document.getElementById('id_' + p + 'hora_fin');
+    var caja = document.getElementById('estimado');
+    if (!sala || !ini || !fin || !caja) { return; }
+    function minutos(t) { var x = (t || '').split(':'); return x.length < 2 ? NaN : parseInt(x[0], 10) * 60 + parseInt(x[1], 10); }
+    function pesos(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
+    function calcular() {
+        var s = DATOS.salas[sala.value], a = minutos(ini.value), b = minutos(fin.value);
+        if (!s) { caja.textContent = 'Elige la sala y el horario para ver cuánto cuesta.'; return; }
+        var base = s.nombre + ': ' + pesos(s.normal) + ' por hora' + (s.punta !== s.normal ? ' (' + pesos(s.punta) + ' en hora punta)' : '') + '.';
+        if (isNaN(a) || isNaN(b) || b <= a) { caja.textContent = base + ' Indica la hora de inicio y término para calcular el total.'; return; }
+        var pi = minutos(DATOS.punta[0]), pf = minutos(DATOS.punta[1]), total = 0;
+        for (var t = a; t < b; t += 30) {
+            var nb = Math.min(t + 30, b), frac = (nb - t) / 60;
+            total += ((t >= pi && t < pf) ? s.punta : s.normal) * frac;
+        }
+        var horas = (b - a) / 60;
+        caja.innerHTML = base + ' <strong>' + (Math.round(horas * 100) / 100) + ' hora(s) → total ' + pesos(total) + '</strong>';
+    }
+    [sala, fecha, ini, fin].forEach(function (el) { if (el) { el.addEventListener('input', calcular); el.addEventListener('change', calcular); } });
+    calcular();
+})();
+</script>

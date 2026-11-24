@@ -1,0 +1,30 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Reservar una sala | GymManager Pro{% endblock %}
+{% block page_title %}Reservar una sala{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-door-open mr-1"></i> Reservar una sala</h6></div>
+            <div class="card-body">
+                <p class="text-muted small">Para entrenadores personales o grupos privados. La sala se cobra <strong>por hora</strong>: el sistema calcula el total según el horario.
+                    No puede chocar con clases ni con otras reservas (se dejan 15 minutos de limpieza).</p>
+                <ul class="small mb-3">
+                    {% for s in salas %}<li><strong>{{ s.nombre }}</strong>: ${{ s.precio_hora|floatformat:"0g" }} por hora{% if s.precio_hora_punta %} (${{ s.precio_hora_punta|floatformat:"0g" }} en hora punta){% endif %}</li>{% endfor %}
+                </ul>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% include 'partials/campos_form.html' %}
+                    <div id="estimado" class="alert alert-info small">Elige la sala y el horario para ver cuánto cuesta.</div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Reservar</button>
+                    <a href="{% url 'reservas:salas_reservas' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}{% include 'reservas/_estimador_precio.html' %}{% endblock %}

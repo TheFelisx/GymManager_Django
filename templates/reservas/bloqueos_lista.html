@@ -1,0 +1,28 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Feriados y cierres | GymManager Pro{% endblock %}
+{% block page_title %}Feriados y cierres{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-2 mb-sm-0 text-gray-800">Feriados y cierres</h1>
+    <div>
+        <a href="{% url 'reservas:editar_tarifas' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-tags"></i> Tarifas</a>
+        <a href="{% url 'reservas:crear_bloqueo' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Bloquear fechas</a>
+    </div>
+</div>
+<div class="card shadow mb-4">
+    <ul class="list-group list-group-flush">
+        {% for b in pagina %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div><strong>{{ b.motivo }}</strong><br><small class="text-muted">{{ b.fecha_desde|date:"d/m/Y" }} – {{ b.fecha_hasta|date:"d/m/Y" }} · {{ b.sala.nombre|default:"Todas las salas" }}</small></div>
+                <form method="post" action="{% url 'reservas:eliminar_bloqueo' b.pk %}" onsubmit="return confirm('¿Quitar este bloqueo? Se reactivarán las sesiones que se cancelaron por él.');">
+                    {% csrf_token %}<button class="btn btn-outline-danger btn-sm">Quitar</button></form>
+            </li>
+        {% empty %}
+            <li class="list-group-item text-center text-muted py-4">No hay fechas bloqueadas próximas.</li>
+        {% endfor %}
+    </ul>
+    {% include 'partials/paginacion.html' %}
+</div>
+{% endblock %}

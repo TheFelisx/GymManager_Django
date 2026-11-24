@@ -1,0 +1,41 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Cambios de instructor | GymManager Pro{% endblock %}
+{% block page_title %}Cambios de instructor{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-gray-800">Solicitudes de los instructores</h1>
+<div class="card shadow mb-4">
+    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-warning">Pendientes ({{ pagina.paginator.count }})</h6></div>
+    <ul class="list-group list-group-flush">
+        {% for s in pagina %}
+            <li class="list-group-item">
+                <strong>{{ s.solicitante.get_full_name|default:s.solicitante.username }}</strong> pide <strong>{{ s.get_tipo_display|lower }}</strong>:
+                {{ s.sesion.clase.nombre }} · {{ s.sesion.fecha|date:"d/m/Y" }} {{ s.sesion.hora_inicio|time:"H:i" }}<br>
+                <small class="text-muted">Motivo: {{ s.motivo }}</small>
+                <form method="post" action="{% url 'reservas:resolver_cambio' s.pk %}" class="form-inline mt-2">
+                    {% csrf_token %}
+                    {% if s.tipo == 'SUPLENCIA' %}<span class="mr-1">{{ form.suplente }}</span>{% endif %}
+                    <input type="text" name="nota" class="form-control form-control-sm mr-1" placeholder="Nota (opcional)">
+                    <button name="decision" value="aprobar" class="btn btn-success btn-sm mr-1">Aprobar</button>
+                    <button name="decision" value="rechazar" class="btn btn-outline-danger btn-sm">Rechazar</button>
+                </form>
+            </li>
+        {% empty %}
+            <li class="list-group-item text-center text-muted py-4">No hay solicitudes pendientes.</li>
+        {% endfor %}
+    </ul>
+    {% include 'partials/paginacion.html' %}
+</div>
+<div class="card shadow mb-4">
+    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Últimas resueltas</h6></div>
+    <ul class="list-group list-group-flush">
+        {% for s in resueltas %}
+            <li class="list-group-item small">{{ s.get_tipo_display }} · {{ s.sesion.clase.nombre }} {{ s.sesion.fecha|date:"d/m" }} · {{ s.solicitante.username }} →
+                <span class="badge {% if s.estado == 'APROBADA' %}badge-success{% else %}badge-secondary{% endif %}">{{ s.get_estado_display }}</span></li>
+        {% empty %}
+            <li class="list-group-item text-center text-muted py-3">Sin historial.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

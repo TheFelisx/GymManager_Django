@@ -1,0 +1,98 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}{{ sesion.clase.nombre }} | GymManager Pro{% endblock %}
+{% block page_title %}Clase{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-gray-800">{{ sesion.clase.nombre }}</h1>
+        <div class="text-muted">{{ sesion.fecha|date:"l d/m/Y" }} · {{ sesion.hora_inicio|time:"H:i" }}–{{ sesion.hora_fin|time:"H:i" }} · {{ sesion.clase.sala.nombre }}
+            {% if sesion.cancelada %}<span class="badge badge-danger">Cancelada: {{ sesion.motivo_cancelacion }}</span>{% elif sesion.cerrada %}<span class="badge badge-dark">Cerrada</span>{% endif %}</div>
+    </div>
+    <a href="{% url 'reservas:ocupacion' %}?fecha={{ sesion.fecha|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm mt-2 mt-sm-0"><i class="fas fa-arrow-left"></i> Volver</a>
+</div>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <div class="h4 mb-0">{{ sesion.ocupados }} / {{ sesion.cupo_total }} <small class="text-muted h6">cupos</small></div>
+                <div class="small text-muted">Socios pueden tomar: {{ sesion.libres_socio }} · Visitantes: {{ sesion.libres_externo }} · En espera: {{ sesion.en_espera }}</div>
+                <hr>
+                <div class="small">Instructor: <strong>{{ sesion.instructor_efectivo.get_full_name|default:sesion.instructor_efectivo.username|default:"Sin asignar" }}</strong>{% if sesion.instructor %} (suplente){% endif %}</div>
+            </div>
+        </div>
+
+        {% if not sesion.cancelada and not sesion.cerrada %}
+        <div class="card shadow mb-4" id="agregar">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-user-plus mr-1"></i> Agregar gente a esta clase</h6></div>
+            <div class="card-body">
+                <form method="post" action="{% url 'reservas:staff_inscribir_socio' sesion.pk %}">
+                    {% csrf_token %}
+                    <input type="text" name="rut" class="form-control mb-2" placeholder="RUT del socio" required>
+                    <button class="btn btn-primary btn-block">Inscribir</button>
+                </form>
+                <hr>
+                <a href="{% url 'reservas:staff_inscribir_visitante' sesion.pk %}" class="btn btn-success btn-block"><i class="fas fa-cash-register"></i> Inscribir y cobrar a un visitante</a>
+                <p class="small text-muted mt-2 mb-0">Se puede inscribir hasta 10 minutos después del inicio. El cupo nunca se supera.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if puede_admin and not sesion.cancelada %}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Administración</h6></div>
+            <div class="card-body">
+                <form method="post" action="{% url 'reservas:sesion_suplente' sesion.pk %}" class="mb-3">
+                    {% csrf_token %}
+                    {{ form_suplente.instructor }}
+                    <button class="btn btn-outline-primary btn-sm btn-block mt-2">Guardar suplente de esta sesión</button>
+                </form>
+                <a href="{% url 'reservas:cancelar_sesion' sesion.pk %}" class="btn btn-outline-danger btn-sm btn-block">Cancelar solo esta sesión</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow" id="inscritos">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-users mr-1"></i> Gente inscrita ({{ pagina.paginator.count }})</h6></div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="thead-light"><tr><th>Persona</th><th>Estado</th><th>Pago</th><th></th></tr></thead>
+                    <tbody>
+                        {% for i in pagina %}
+                            <tr {% if i.estado == 'CANCELADA' %}class="text-muted"{% endif %}>
+                                <td>{% if i.socio %}<a href="{% url 'panel:detalle_socio' i.socio.pk %}">{{ i.persona_nombre }}</a>{% else %}{{ i.persona_nombre }} <span class="badge badge-info">Visitante</span><br>{% if i.estado == 'CONFIRMADA' or i.estado == 'ASISTIO' %}<a href="{% url 'reservas:qr_visita' 'clase' i.pk %}" class="small"><i class="fas fa-qrcode"></i> Ver QR de acceso</a>{% endif %}{% endif %}</td>
+                                <td><span class="badge {% if i.estado == 'CONFIRMADA' or i.estado == 'ASISTIO' %}badge-success{% elif i.estado == 'EN_ESPERA' %}badge-warning{% elif i.estado == 'NO_ASISTIO' %}badge-danger{% else %}badge-secondary{% endif %}">{{ i.get_estado_display }}</span></td>
+                                <td class="small">
+                                    {% if i.visitante %}
+                                        {% if i.es_prueba %}<span class="text-success font-weight-bold">Primera clase de prueba: no se cobra</span>{% elif i.pagada %}Pagada ${{ i.monto_pagado|floatformat:"0g" }}{% else %}
+                                            <form method="post" action="{% url 'reservas:staff_cobrar_inscripcion' i.pk %}" class="form-inline">
+                                                {% csrf_token %}
+                                                <select name="metodo" class="form-select form-select-sm mr-1">{% for v, n in form_pago.fields.metodo.choices %}<option value="{{ v }}">{{ n }}</option>{% endfor %}</select>
+                                                <button class="btn btn-success btn-sm" title="Se cobra el precio completo de la clase">Cobrar ${{ i.monto|floatformat:"0g" }}</button>
+                                            </form>
+                                        {% endif %}
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td class="text-right">
+                                    {% if i.estado == 'CONFIRMADA' or i.estado == 'EN_ESPERA' %}
+                                        <form method="post" action="{% url 'reservas:staff_cancelar_inscripcion' i.pk %}" onsubmit="return confirm('¿Cancelar esta inscripción?');">
+                                            {% csrf_token %}<button class="btn btn-outline-danger btn-sm">Cancelar</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted py-4">Aún no hay inscritos.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'partials/paginacion.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}

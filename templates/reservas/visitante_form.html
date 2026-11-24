@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} | {{ gym.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 640px;">
+    <h2 class="mb-1">{{ titulo }}</h2>
+    <p class="text-muted">{{ subtitulo }}</p>
+    {% if es_clase %}
+        <div class="alert alert-info small">
+            {% if tarifa.prueba_gratis %}Tu <strong>primera clase de prueba es gratis</strong> (una por persona). Las siguientes cuestan ${{ tarifa.precio_clase_suelta|floatformat:"0g" }} y se pagan en recepción.
+            {% else %}La clase suelta cuesta ${{ tarifa.precio_clase_suelta|floatformat:"0g" }} y se paga en recepción.{% endif %}
+            Puedes cancelar hasta 2 horas antes. Si no pagas en 24 horas, el cupo se libera.
+        </div>
+    {% endif %}
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% include 'partials/campos_form.html' %}
+        <button type="submit" class="btn btn-primary">Confirmar reserva</button>
+        <a href="{% url 'reservas:horario' %}" class="btn btn-outline-secondary">Volver</a>
+    </form>
+</div>
+{% endblock %}

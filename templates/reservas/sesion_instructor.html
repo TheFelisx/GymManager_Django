@@ -1,0 +1,64 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}{{ sesion.clase.nombre }} | GymManager Pro{% endblock %}
+{% block page_title %}Pasar lista{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center"><div class="col-12 col-lg-8">
+    <a href="{% url 'reservas:agenda' %}" class="btn btn-outline-secondary btn-sm mb-3"><i class="fas fa-arrow-left"></i> Mi agenda</a>
+    <h1 class="h3 mb-0 text-gray-800">{{ sesion.clase.nombre }}</h1>
+    <div class="text-muted mb-3">{{ sesion.fecha|date:"l d/m/Y" }} · {{ sesion.hora_inicio|time:"H:i" }}–{{ sesion.hora_fin|time:"H:i" }} · {{ sesion.clase.sala.nombre }}</div>
+    {% if sesion.cancelada %}<div class="alert alert-danger">Sesión cancelada: {{ sesion.motivo_cancelacion }}</div>{% endif %}
+
+    {% if puede_ver %}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Inscritos ({{ inscritos|length }})</h6></div>
+            <ul class="list-group list-group-flush">
+                {% for i in inscritos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            {% if i.socio and i.socio.foto %}<img src="{{ i.socio.foto.url }}" alt="" class="rounded-circle object-cover mr-3" style="width: 48px; height: 48px;">
+                            {% else %}<div class="avatar-circle mr-3" style="width: 48px; height: 48px; font-size: 1rem;">{{ i.persona_nombre|slice:":1" }}</div>{% endif %}
+                            <div><div class="font-weight-bold">{{ i.persona_nombre }}</div>{% if i.visitante %}<small class="text-info">Visitante</small>{% endif %}</div>
+                        </div>
+                        {% if not sesion.cerrada and not sesion.cancelada %}
+                            <form method="post" action="{% url 'reservas:instructor_marcar' i.pk %}" class="text-nowrap">
+                                {% csrf_token %}
+                                <button name="asistio" value="1" class="btn btn-sm {% if i.estado == 'ASISTIO' %}btn-success{% else %}btn-outline-success{% endif %}" title="Asistió"><i class="fas fa-check"></i></button>
+                                <button name="asistio" value="0" class="btn btn-sm {% if i.estado == 'NO_ASISTIO' %}btn-danger{% else %}btn-outline-danger{% endif %}" title="No asistió"><i class="fas fa-times"></i></button>
+                            </form>
+                        {% else %}
+                            <span class="badge {% if i.estado == 'ASISTIO' %}badge-success{% elif i.estado == 'NO_ASISTIO' %}badge-danger{% else %}badge-secondary{% endif %}">{{ i.get_estado_display }}</span>
+                        {% endif %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-center text-muted py-4">Sin inscritos.</li>
+                {% endfor %}
+            </ul>
+            {% if not sesion.cerrada and not sesion.cancelada %}
+                <div class="card-footer">
+                    <form method="post" action="{% url 'reservas:instructor_cerrar' sesion.pk %}" onsubmit="return confirm('Quien no esté marcado quedará como «no asistió». ¿Cerrar la clase?');">
+                        {% csrf_token %}<button class="btn btn-dark btn-block">Cerrar clase</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning">La lista de inscritos se abre 24 horas antes de la clase y se cierra 24 horas después.</div>
+    {% endif %}
+
+    {% if not sesion.cancelada and not sesion.cerrada %}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">¿No puedes dar esta clase?</h6></div>
+            <div class="card-body">
+                <form method="post" action="{% url 'reservas:instructor_pedir_cambio' sesion.pk %}">
+                    {% csrf_token %}
+                    {% include 'partials/campos_form.html' with form=form_cambio %}
+                    <button class="btn btn-outline-primary">Enviar solicitud a administración</button>
+                </form>
+                {% for s in solicitudes %}<div class="small mt-2">{{ s.get_tipo_display }} · <strong>{{ s.get_estado_display }}</strong></div>{% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div></div>
+{% endblock %}

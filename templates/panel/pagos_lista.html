@@ -1,0 +1,106 @@
+{% extends 'base_panel.html' %}
+{% load l10n %}
+
+{% block title %}Pagos | GymManager Pro{% endblock %}
+{% block page_title %}Pagos{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-2 mb-sm-0 text-gray-800">Historial de pagos</h1>
+    <div>
+        {% if puede_admin %}
+            <a href="{% url 'panel:exportar_pagos' %}?{{ request.GET.urlencode }}" class="btn btn-outline-secondary btn-sm mb-1"><i class="fas fa-file-excel"></i> Exportar a Excel (CSV)</a>
+        {% endif %}
+        <a href="{% url 'panel:registrar_pago' %}" class="btn btn-success btn-sm btn-icon-split mb-1">
+            <span class="icon text-white-50"><i class="fas fa-cash-register"></i></span>
+            <span class="text">Registrar pago</span>
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card shadow mb-4">
+    <div class="card-body py-3">
+        <form method="get">
+            <div class="form-row align-items-end">
+                <div class="form-group col-6 col-md-2 mb-2">
+                    <label class="small font-weight-bold mb-1">Desde</label>
+                    <input type="date" name="desde" value="{{ filtros.desde|date:'Y-m-d' }}" class="form-control form-control-sm">
+                </div>
+                <div class="form-group col-6 col-md-2 mb-2">
+                    <label class="small font-weight-bold mb-1">Hasta</label>
+                    <input type="date" name="hasta" value="{{ filtros.hasta|date:'Y-m-d' }}" class="form-control form-control-sm">
+                </div>
+                <div class="form-group col-6 col-md-2 mb-2">
+                    <label class="small font-weight-bold mb-1">Método</label>
+                    <select name="metodo" class="form-select form-select-sm">
+                        <option value="">Todos</option>
+                        {% for valor, nombre in metodos %}<option value="{{ valor }}" {% if filtros.metodo == valor %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-6 col-md-2 mb-2">
+                    <label class="small font-weight-bold mb-1">Plan</label>
+                    <select name="plan" class="form-select form-select-sm">
+                        <option value="">Todos</option>
+                        {% for p in planes %}<option value="{{ p.pk }}" {% if filtros.plan == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.nombre }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-8 col-md-2 mb-2">
+                    <label class="small font-weight-bold mb-1">Socio</label>
+                    <input type="text" name="q" value="{{ filtros.q }}" placeholder="RUT o nombre" class="form-control form-control-sm">
+                </div>
+                <div class="form-group col-4 col-md-2 mb-2">
+                    <button type="submit" class="btn btn-dark btn-sm btn-block"><i class="fas fa-filter"></i> Filtrar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    {% if pagina %}
+        <div class="card-header py-3">
+            <span class="font-weight-bold text-success">Total del período (sin anulados): ${{ total_periodo|floatformat:"0g" }}</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th><th>Socio</th><th>Plan</th><th>Método</th><th>Monto</th><th>Vigencia</th>
+                            {% if puede_admin %}<th class="no-sort"></th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pagina %}
+                            <tr {% if p.anulado %}class="text-muted"{% endif %}>
+                                <td data-order="{{ p.fecha_pago|date:'Y-m-d H:i:s' }}">{{ p.fecha_pago|date:"d/m/Y H:i" }}</td>
+                                <td>{{ p.socio.usuario.get_full_name }}<br><small class="text-muted">{{ p.socio.rut_formateado }}</small></td>
+                                <td>{{ p.plan.nombre }}{% if p.descuento %}<br><small class="text-muted">Desc. ${{ p.descuento|floatformat:"0g" }}</small>{% endif %}</td>
+                                <td>{{ p.get_metodo_pago_display }}</td>
+                                <td class="font-weight-bold {% if not p.anulado %}text-success{% endif %}" data-order="{{ p.monto_pagado|unlocalize }}">
+                                    {% if p.anulado %}<s>${{ p.monto_pagado|floatformat:"0g" }}</s><br><span class="badge badge-secondary">Anulado</span>{% else %}${{ p.monto_pagado|floatformat:"0g" }}{% endif %}
+                                </td>
+                                <td>{{ p.fecha_inicio|date:"d/m" }} – {{ p.fecha_vencimiento|date:"d/m/Y" }}
+                                    {% if p.anulado %}<br><small title="{{ p.motivo_anulacion }}">Motivo: {{ p.motivo_anulacion|truncatechars:40 }}</small>{% endif %}
+                                </td>
+                                {% if puede_admin %}
+                                    <td>
+                                        {% if not p.anulado %}
+                                            <a href="{% url 'panel:anular_pago' p.pk %}" class="btn btn-outline-danger btn-sm">Anular</a>
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'partials/paginacion.html' %}
+        </div>
+    {% else %}
+        <div class="empty-state"><i class="fas fa-receipt"></i>No hay pagos en este período.</div>
+    {% endif %}
+</div>
+{% endblock %}
+

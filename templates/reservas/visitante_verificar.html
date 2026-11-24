@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Código de verificación | {{ gym.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 560px;">
+    <h2 class="mb-3">Ingresa tu código</h2>
+    <p class="text-muted">Lo enviamos a <strong>{{ email }}</strong>. Vence en 15 minutos.</p>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% include 'partials/campos_form.html' %}
+        <button type="submit" class="btn btn-primary">Verificar</button>
+        <a href="{% url 'reservas:visitante_acceso' %}" class="btn btn-outline-secondary">Pedir otro código</a>
+    </form>
+</div>
+{% endblock %}

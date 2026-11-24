@@ -1,0 +1,53 @@
+{% extends 'base_sb.html' %}
+
+{% block title %}Cambiar contraseña | GymManager Pro{% endblock %}
+{% block body_class %}bg-gym-login{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-xl-6 col-lg-7 col-md-9">
+
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-5">
+                    <div class="text-center">
+                        <i class="fas fa-key fa-2x text-primary mb-2"></i>
+                        <h1 class="h4 text-gray-900 mb-1">Actualizar contraseña</h1>
+                        <p class="text-muted small mb-4">Crea una nueva clave segura para proteger tu cuenta.</p>
+                    </div>
+
+                    {% include 'partials/mensajes.html' %}
+
+                    <form method="post" class="form-user" novalidate>
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+                            </div>
+                        {% endif %}
+                        {% for field in form %}
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}" class="small font-weight-bold text-gray-800 ml-2 mb-1">{{ field.label }}</label>
+                                <input type="password"
+                                       name="{{ field.html_name }}"
+                                       id="{{ field.id_for_label }}"
+                                       class="form-control {% if field.errors %}is-invalid{% endif %}"
+                                       autocomplete="{% if field.html_name == 'old_password' %}current-password{% else %}new-password{% endif %}"
+                                       required>
+                                {% if field.help_text %}
+                                    <div class="form-text small text-muted ml-2 mt-2">{{ field.help_text|safe }}</div>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="text-danger small mt-1 ml-3">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary btn-user btn-block mt-4">Guardar nueva contraseña</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

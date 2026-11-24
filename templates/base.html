@@ -1,0 +1,240 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es-cl">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}GymManager Pro{% endblock %}</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="{% block meta_description %}GymManager Pro: planes con horario, acceso con QR y zona privada para socios.{% endblock %}" name="description">
+
+    <!-- Fuentes (plantilla Fitness) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Teko:wght@300..700&display=swap" rel="stylesheet">
+
+    <!-- Íconos -->
+    <link rel="stylesheet" href="{% static 'vendor/fontawesome-free/css/all.min.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Librerías de la plantilla -->
+    <link rel="stylesheet" href="{% static 'lib/animate/animate.min.css' %}">
+    <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap 5 personalizado + estilos Fitness -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- Spinner -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+
+    {% block navbar %}
+    <!-- Navbar & Hero Start -->
+    <div class="container-fluid header-top">
+        <div class="nav-shaps-2"></div>
+        <div class="container d-flex align-items-center">
+            <div class="d-flex align-items-center h-100">
+                <a href="{% url 'publica:inicio' %}" class="navbar-brand" style="height: 125px;">
+                    <h1 class="text-primary mb-0"><i class="fas fa-dumbbell me-2"></i> GymManager</h1>
+                </a>
+            </div>
+            <div class="w-100 h-100">
+                <div class="topbar px-0 py-2 d-none d-lg-block" style="height: 45px;">
+                    <div class="row gx-0 align-items-center">
+                        <div class="col-lg-8 text-center text-lg-center mb-lg-0">
+                            <div class="d-flex flex-wrap">
+                                <div class="pe-4">
+                                    <a href="#contacto" class="text-muted small"><i class="fas fa-envelope text-primary me-2"></i>{{ gym.email }}</a>
+                                </div>
+                                <div class="pe-0">
+                                    <a href="#contacto" class="text-muted small"><i class="fa fa-clock text-primary me-2"></i>{{ gym.horario }}</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 text-center text-lg-end">
+                            <div class="d-flex justify-content-end">
+                                <div class="d-flex align-items-center small">
+                                    {% if user.is_authenticated %}
+                                        <span class="text-body me-3">Hola, {{ user.first_name|default:user.username }}</span>
+                                        <a href="{% url 'cuentas:logout' %}" class="text-body me-3">Salir</a>
+                                    {% else %}
+                                        <a href="{% url 'cuentas:login' %}" class="login-btn text-body me-3 pe-3"><span>Soy socio</span></a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar px-0 py-lg-0" style="height: 80px;">
+                    <nav class="navbar navbar-expand-lg navbar-light d-flex justify-content-lg-end">
+                        <a href="{% url 'publica:inicio' %}" class="navbar-brand-2">
+                            <h1 class="text-primary mb-0"><i class="fas fa-dumbbell me-2"></i> GymManager</h1>
+                        </a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-label="Abrir menú">
+                            <span class="fa fa-bars"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarCollapse">
+                            <div class="navbar-nav mx-0 mx-lg-auto">
+                                <a href="{% url 'publica:inicio' %}#inicio" class="nav-item nav-link active">Inicio</a>
+                                <a href="{% url 'publica:inicio' %}#nosotros" class="nav-item nav-link">Nosotros</a>
+                                <a href="{% url 'publica:inicio' %}#acceso" class="nav-item nav-link">Acceso QR</a>
+                                <a href="{% url 'publica:inicio' %}#planes" class="nav-item nav-link">Planes</a>
+                                <a href="{% url 'reservas:horario' %}" class="nav-item nav-link">Clases</a>
+                                <a href="{% url 'publica:inicio' %}#entrenadores" class="nav-item nav-link">Entrenadores</a>
+                                <a href="{% url 'publica:inicio' %}#preguntas" class="nav-item nav-link">Preguntas</a>
+                                <a href="{% url 'publica:inicio' %}#contacto" class="nav-item nav-link">Contacto</a>
+                                <div class="nav-btn ps-3">
+                                    {% include 'partials/cta_acceso.html' with clase='btn btn-primary py-2 px-4 ms-0 ms-lg-3 mt-2 mt-lg-0 mb-4 mb-lg-0' %}
+                                </div>
+                                <div class="nav-shaps-1"></div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Navbar & Hero End -->
+    {% endblock %}
+
+    {% if messages %}
+        <div class="container pt-4">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.level_tag == 'error' %}danger{% else %}{{ message.level_tag|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    {% block footer %}
+    <!-- Footer Start -->
+    <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.2s" id="contacto">
+        <div class="container py-5">
+            <div class="row g-5 mb-5 align-items-center">
+                <div class="col-lg-7">
+                    <h2 class="text-white mb-0">¿Listo para empezar? Pasa por recepción con tu RUT.</h2>
+                </div>
+                <div class="col-lg-5">
+                    <div class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                        {% if gym.facebook %}<a class="btn btn-primary btn-md-square me-3" href="{{ gym.facebook }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>{% endif %}
+                        {% if gym.instagram %}<a class="btn btn-primary btn-md-square me-3" href="{{ gym.instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>{% endif %}
+                        {% if gym.whatsapp %}<a class="btn btn-primary btn-md-square me-0" href="https://wa.me/{{ gym.whatsapp }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row g-5">
+                <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item">
+                        <h4 class="text-white mb-4"><i class="fas fa-dumbbell text-primary me-2"></i> GymManager Pro</h4>
+                        <p class="mb-0">Planes con horario, control de acceso con RUT o QR y una zona privada para cada socio.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item">
+                        <h4 class="text-white mb-4">Enlaces</h4>
+                        <a href="{% url 'publica:inicio' %}#nosotros"> Nosotros</a>
+                        <a href="{% url 'publica:inicio' %}#acceso"> Acceso QR</a>
+                        <a href="{% url 'publica:inicio' %}#planes"> Planes</a>
+                        <a href="{% url 'reservas:horario' %}"> Clases y salas</a>
+                        <a href="{% url 'publica:inicio' %}#entrenadores"> Entrenadores</a>
+                        <a href="{% url 'publica:inicio' %}#preguntas"> Preguntas frecuentes</a>
+                        <a href="{% url 'cuentas:login' %}"> Iniciar sesión</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item">
+                        <h4 class="text-white mb-4">Contacto</h4>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <div class="d-flex">
+                                    <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                    <div>
+                                        <h5 class="text-white mb-2">Dirección</h5>
+                                        <p class="mb-0">{{ gym.direccion }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex">
+                                    <i class="fas fa-envelope text-primary me-2"></i>
+                                    <div>
+                                        <h5 class="text-white mb-2">Correo</h5>
+                                        <p class="mb-0">{{ gym.email }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex">
+                                    <i class="fa fa-phone-alt text-primary me-2"></i>
+                                    <div>
+                                        <h5 class="text-white mb-2">Teléfono</h5>
+                                        <p class="mb-0">{{ gym.telefono }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item">
+                        <h4 class="text-white mb-4">Galería</h4>
+                        <div class="row g-2">
+                            {% for n in '12345678' %}
+                                <div class="col-3">
+                                    <div class="footer-item-img">
+                                        <img src="{% static 'img/work-'|add:n|add:'.jpg' %}" class="img-fluid" alt="Galería del gimnasio">
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+    <!-- Copyright Start -->
+    <div class="container-fluid copyright py-4">
+        <div class="container">
+            <div class="row g-4 align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-md-0">
+                    <span class="text-body"><a href="{% url 'publica:inicio' %}" class="border-bottom text-white"><i class="fas fa-copyright text-light me-2"></i>GymManager Pro</a>, todos los derechos reservados.</span>
+                </div>
+                <div class="col-md-6 text-center text-md-end text-body">
+                    <!--/*** Esta plantilla es gratuita mientras se mantenga el crédito del autor (HTML Codex / ThemeWagon). ***/-->
+                    Diseño: <a class="border-bottom text-white" href="https://htmlcodex.com">HTML Codex</a>
+                    Distribución: <a href="https://themewagon.com/">ThemeWagon</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Copyright End -->
+    {% endblock %}
+
+    <!-- Volver arriba -->
+    <div class="back-to-top">
+        <a href="#" class="btn" aria-label="Volver arriba"><i class="fa fa-arrow-up"></i></a>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'lib/wow/wow.min.js' %}"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

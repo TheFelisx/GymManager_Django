@@ -1,0 +1,14 @@
+<a href="{% url 'panel:editar_usuario' u.pk %}" class="btn btn-outline-primary btn-sm" title="Editar"><i class="fas fa-edit"></i></a>
+{% if u.pk != user.pk %}
+    <form method="post" action="{% url 'panel:restablecer_clave_usuario' u.pk %}" class="d-inline"
+          onsubmit="return confirm('Se asignará una clave temporal y se cerrarán sus sesiones. ¿Continuar?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-dark btn-sm" title="Restablecer clave"><i class="fas fa-key"></i></button>
+    </form>
+    <form method="post" action="{% url 'panel:alternar_usuario' u.pk %}" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-{% if u.is_active %}danger{% else %}success{% endif %} btn-sm">
+            {% if u.is_active %}Desactivar{% else %}Activar{% endif %}
+        </button>
+    </form>
+{% endif %}

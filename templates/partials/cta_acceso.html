@@ -1,0 +1,11 @@
+{% if user.is_authenticated %}
+    {% if user.rol == 'SOCIO' %}
+        <a href="{% url 'panel:zona_socio' %}" class="{{ clase }}"><span><i class="fas fa-qrcode me-2"></i>Mi credencial QR</span></a>
+    {% elif user.rol == 'GUARDIA' %}
+        <a href="{% url 'totem:inicio' %}" class="{{ clase }}"><span><i class="fas fa-shield-alt me-2"></i>Ir al tótem</span></a>
+    {% else %}
+        <a href="{% url 'panel:inicio' %}" class="{{ clase }}"><span><i class="fas fa-tachometer-alt me-2"></i>Ir al panel</span></a>
+    {% endif %}
+{% else %}
+    <a href="{% url 'cuentas:login' %}" class="{{ clase }}"><span><i class="fas fa-user-circle me-2"></i>Iniciar sesión</span></a>
+{% endif %}

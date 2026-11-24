@@ -1,0 +1,29 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}{{ titulo }} | GymManager Pro{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7 col-xl-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold {% if peligro %}text-danger{% else %}text-primary{% endif %}">{{ titulo }}</h6>
+            </div>
+            <div class="card-body">
+                {% if texto %}<p class="text-muted">{{ texto }}</p>{% endif %}
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% include 'partials/campos_form.html' %}
+                    <button type="submit" class="btn {% if peligro %}btn-danger{% else %}btn-primary{% endif %}">{{ boton }}</button>
+                    {% if volver_pk %}
+                        <a href="{% url volver volver_pk %}" class="btn btn-outline-secondary">Cancelar</a>
+                    {% else %}
+                        <a href="{% url volver %}" class="btn btn-outline-secondary">Cancelar</a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

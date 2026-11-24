@@ -1,0 +1,27 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Mi perfil | GymManager Pro{% endblock %}
+{% block page_title %}Mi perfil{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-user-edit mr-1"></i> Mis datos de contacto</h6></div>
+            <div class="card-body">
+                <dl class="small mb-4">
+                    <dt>Nombre</dt><dd>{{ user.get_full_name }}</dd>
+                    <dt>RUT</dt><dd class="mb-0">{{ socio.rut_formateado }}</dd>
+                </dl>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% include 'partials/campos_form.html' %}
+                    <p class="small text-muted"><i class="fas fa-info-circle"></i> Tu foto y tu RUT los cambia el personal en recepción.</p>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Guardar</button>
+                    <a href="{% url 'cuentas:cambiar_clave' %}" class="btn btn-outline-secondary"><i class="fas fa-key"></i> Cambiar contraseña</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

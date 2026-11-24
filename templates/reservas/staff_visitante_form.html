@@ -1,0 +1,61 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Inscribir y cobrar | GymManager Pro{% endblock %}
+{% block page_title %}Inscribir y cobrar{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">{{ sesion.clase.nombre }} · {{ sesion.fecha|date:"d/m" }} {{ sesion.hora_inicio|time:"H:i" }}</h6></div>
+            <div class="card-body">
+                <p class="small text-muted">Cupos libres: {{ sesion.libres_externo }}. La inscripción se confirma solo con el pago registrado
+                    {% if tarifa.prueba_gratis %}(la primera clase de prueba es gratis y no necesita pago){% endif %}. Se genera el código de visita que el guardia valida en el tótem.</p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% include 'partials/campos_form.html' %}
+                    <div id="aviso-prueba" class="alert alert-success d-none mt-3"><i class="fas fa-gift"></i> <strong>Primera clase de prueba: no se le puede cobrar.</strong> Es gratis (una por persona).</div>
+                    <div id="bloque-cobro">
+                        <h6 class="font-weight-bold mt-3">Cobro</h6>
+                        <div class="alert alert-info py-2 small mb-2">Se cobra el precio de la clase: <strong>${{ tarifa.precio_clase_suelta|floatformat:"0g" }}</strong>. El monto no se puede cambiar.</div>
+                        {% for field in form_pago %}{% include 'partials/campo.html' with field=field %}{% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-cash-register mr-1"></i> Inscribir y cobrar</button>
+                    <a href="{% url 'reservas:sesion_detalle' sesion.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var rut = document.getElementById('id_rut');
+    if (!rut) { return; }
+    var aviso = document.getElementById('aviso-prueba');
+    var cobro = document.getElementById('bloque-cobro');
+    var url = "{% url 'reservas:visitante_estado' %}";
+    var espera = null;
+    function revisar() {
+        var valor = rut.value.trim();
+        if (valor.replace(/[^0-9kK]/g, '').length < 8) { aviso.classList.add('d-none'); cobro.classList.remove('d-none'); return; }
+        fetch(url + '?rut=' + encodeURIComponent(valor), { credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (!d.valido) { return; }
+                var gratis = d.prueba;
+                aviso.classList.toggle('d-none', !gratis);
+                cobro.classList.toggle('d-none', gratis);
+                aviso.querySelector('strong').textContent = d.existe
+                    ? 'Primera clase de prueba de ' + d.nombre + ': no se le puede cobrar.'
+                    : 'Primera clase de prueba: no se le puede cobrar.';
+            })
+            .catch(function () { /* sin red: se muestra el cobro normal */ });
+    }
+    rut.addEventListener('input', function () { clearTimeout(espera); espera = setTimeout(revisar, 400); });
+    rut.addEventListener('blur', revisar);
+})();
+</script>
+{% endblock %}

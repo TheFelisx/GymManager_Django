@@ -1,0 +1,27 @@
+{% load static %}<script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+<script>
+    /* Tablas con orden y paginación. Opciones por atributos data-*:
+       data-order-col, data-order-dir, data-searching="false", data-page-length */
+    $(function () {
+        $('.js-datatable').each(function () {
+            var $t = $(this);
+            $t.DataTable({
+                order: [[ parseInt($t.data('order-col') || 0, 10), $t.data('order-dir') || 'asc' ]],
+                searching: $t.data('searching') !== false,
+                pageLength: parseInt($t.data('page-length') || 10, 10),
+                lengthChange: false,
+                autoWidth: false,
+                columnDefs: [{ orderable: false, targets: 'no-sort' }],
+                language: {
+                    search: 'Buscar:',
+                    zeroRecords: 'No se encontraron resultados',
+                    info: 'Mostrando _START_ a _END_ de _TOTAL_',
+                    infoEmpty: 'Sin registros',
+                    infoFiltered: '(filtrado de _MAX_)',
+                    paginate: { first: 'Primero', last: 'Último', next: 'Siguiente', previous: 'Anterior' }
+                }
+            });
+        });
+    });
+</script>

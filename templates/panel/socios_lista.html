@@ -1,0 +1,78 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Socios | GymManager Pro{% endblock %}
+{% block page_title %}Socios{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-2 mb-sm-0 text-gray-800">Socios</h1>
+    <a href="{% url 'panel:enrolar_socio' %}" class="btn btn-primary btn-sm btn-icon-split">
+        <span class="icon text-white-50"><i class="fas fa-user-plus"></i></span>
+        <span class="text">Enrolar socio</span>
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <form method="get">
+            <div class="form-row">
+                <div class="col-12 col-md-7 mb-2 mb-md-0">
+                    <input type="text" name="q" value="{{ busqueda }}" class="form-control bg-light border-0 small"
+                           placeholder="Buscar por RUT, nombre o apellido..." aria-label="Buscar">
+                </div>
+                <div class="col-8 col-md-3">
+                    <select name="estado" class="form-select" aria-label="Estado">
+                        <option value="">Todos los estados</option>
+                        <option value="activo" {% if estado == 'activo' %}selected{% endif %}>Activos (plan vigente)</option>
+                        <option value="vencido" {% if estado == 'vencido' %}selected{% endif %}>Vencidos</option>
+                        <option value="baja" {% if estado == 'baja' %}selected{% endif %}>De baja</option>
+                    </select>
+                </div>
+                <div class="col-4 col-md-2">
+                    <button class="btn btn-primary btn-block" type="submit"><i class="fas fa-search fa-sm"></i></button>
+                </div>
+            </div>
+            {% if busqueda or estado %}
+                <a href="{% url 'panel:lista_socios' %}" class="small d-inline-block mt-2"><i class="fas fa-times"></i> Limpiar filtros</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if pagina %}
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" width="100%">
+                    <thead>
+                        <tr><th>Socio</th><th>RUT</th><th>Teléfono</th><th>Membresía</th><th class="no-sort"></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for s in pagina %}
+                            <tr>
+                                <td class="font-weight-bold"><a href="{% url 'panel:detalle_socio' s.pk %}">{{ s.usuario.get_full_name }}</a></td>
+                                <td>{{ s.rut_formateado }}</td>
+                                <td>{{ s.telefono }}</td>
+                                <td>
+                                    {% if not s.usuario.is_active %}
+                                        <span class="badge badge-dark">De baja</span>
+                                    {% elif s.vigente %}
+                                        <span class="badge badge-success">Vigente hasta {{ s.ultimo_venc|date:"d/m/Y" }}</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Vencida / sin plan</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right">
+                                    <a href="{% url 'panel:detalle_socio' s.pk %}" class="btn btn-outline-primary btn-sm">Ver</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'partials/paginacion.html' %}
+        </div>
+    {% else %}
+        <div class="empty-state"><i class="fas fa-user-slash"></i>No se encontraron socios.</div>
+    {% endif %}
+</div>
+{% endblock %}
+

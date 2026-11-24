@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}GymManager Pro | Entrena sin límites{% endblock %}
+
+{% block content %}
+
+<!-- Carousel / Hero Start -->
+<div class="header-carousel owl-carousel overflow-hidden bg-dark" id="inicio">
+    <div class="header-carousel-item hero-section">
+        <div class="hero-bg-half-1"></div>
+        <div class="carousel-caption">
+            <div class="container">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-7 animated fadeInLeft">
+                        <div class="text-sm-center text-md-start">
+                            <h4 class="text-primary text-uppercase fw-bold mb-4">Acceso digital 100% QR</h4>
+                            <h1 class="display-1 text-white mb-4">Entrena sin filas ni esperas</h1>
+                            <p class="mb-5 fs-5">Equipamiento de primer nivel, horarios flexibles y acceso instantáneo desde tu celular.</p>
+                            <div class="d-flex justify-content-center justify-content-md-start flex-shrink-0 mb-4">
+                                <a class="btn btn-dark py-3 px-4 px-md-5 me-2" href="{% url 'cuentas:login' %}"><i class="fas fa-qrcode me-2"></i> <span>Soy socio</span></a>
+                                <a class="btn btn-primary py-3 px-4 px-md-5 ms-2" href="#planes"><span>Ver planes</span></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="header-carousel-item hero-section">
+        <div class="hero-bg-half-2"></div>
+        <div class="carousel-caption">
+            <div class="container">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-7 animated fadeInLeft">
+                        <div class="text-sm-center text-md-start">
+                            <h4 class="text-primary text-uppercase fw-bold mb-4">Planes a tu medida</h4>
+                            <h1 class="display-2 text-white mb-4">Elige el horario que encaja con tu rutina</h1>
+                            <p class="mb-5 fs-5">Cada plan define los días y la franja horaria en que puedes entrenar. Tu QR lo valida por ti.</p>
+                            <div class="d-flex justify-content-center justify-content-md-start flex-shrink-0 mb-4">
+                                <a class="btn btn-primary py-3 px-4 px-md-5" href="#planes"><span>Conocer planes</span></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Carousel / Hero End -->
+
+<!-- About Start -->
+<div class="container-fluid about pt-5" id="nosotros">
+    <div class="container pt-5">
+        <div class="row g-5">
+            <div class="col-xl-6 wow fadeInLeft" data-wow-delay="0.2s">
+                <div class="about-content h-100">
+                    <h4 class="text-primary">Sobre nuestro gimnasio</h4>
+                    <h1 class="display-4 text-white mb-4">Un lugar para cumplir tus metas, a tu ritmo.</h1>
+                    <p class="mb-4">Combinamos buen equipamiento con un sistema simple: te inscribes en recepción, recibes tu credencial QR y entras cuando tu plan lo permite.</p>
+                    <div class="tab-class pb-4">
+                        <ul class="nav d-flex mb-2">
+                            <li class="nav-item mb-3">
+                                <a class="d-flex py-2 active" data-bs-toggle="pill" href="#tab-1"><span style="width: 150px;">Misión</span></a>
+                            </li>
+                            <li class="nav-item mb-3">
+                                <a class="d-flex py-2 mx-3" data-bs-toggle="pill" href="#tab-2"><span style="width: 150px;">Equipamiento</span></a>
+                            </li>
+                            <li class="nav-item mb-3">
+                                <a class="d-flex py-2" data-bs-toggle="pill" href="#tab-3"><span style="width: 150px;">Horarios</span></a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="tab-1" class="tab-pane fade show p-0 active">
+                                <div class="d-flex align-items-center border-top border-bottom py-4">
+                                    <span class="fas fa-bullseye text-white fa-4x me-4"></span>
+                                    <p class="mb-0">Hacer que entrenar sea fácil: menos trámites, más tiempo de ejercicio y una experiencia ordenada para todos los socios.</p>
+                                </div>
+                            </div>
+                            <div id="tab-2" class="tab-pane fade show p-0">
+                                <div class="d-flex align-items-center border-top border-bottom py-4">
+                                    <span class="fas fa-dumbbell text-white fa-4x me-4"></span>
+                                    <p class="mb-0">Sala de musculación y zona de cardio con acceso libre incluido en todos nuestros planes.</p>
+                                </div>
+                            </div>
+                            <div id="tab-3" class="tab-pane fade show p-0">
+                                <div class="d-flex align-items-center border-top border-bottom py-4">
+                                    <span class="fas fa-clock text-white fa-4x me-4"></span>
+                                    <p class="mb-0">Cada plan tiene su franja horaria y sus días permitidos. Los ves en el catálogo y en tu zona de socio.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-4 align-items-center">
+                        <div class="col-sm-6">
+                            <a href="#planes" class="btn btn-primary py-3 px-5"><span>Ver planes</span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 wow fadeInUp" data-wow-delay="0.2s">
+                <div class="about-img h-100">
+                    <div class="about-img-inner d-flex h-100">
+                        <img src="{% static 'img/about-2.png' %}" class="img-fluid w-100" style="object-fit: cover;" alt="Entrenamiento en el gimnasio">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- About End -->
+
+<!-- Acceso QR (Fitness Goal) Start -->
+<div class="container-fluid goal pt-5" id="acceso">
+    <div class="container pt-5">
+        <div class="row g-5">
+            <div class="col-lg-6 wow fadeInLeft" data-wow-delay="0.2s">
+                <div class="goal-content">
+                    <h4 class="text-primary">Acceso inteligente</h4>
+                    <h1 class="display-4 mb-4">Tu celular es tu credencial de entrada.</h1>
+                    <div class="goal-item d-flex p-4">
+                        <div class="d-flex me-4">
+                            <div class="bg-primary d-inline p-3" style="width: 80px; height: 80px;">
+                                <img src="{% static 'img/icon-1.png' %}" class="img-fluid" alt="">
+                            </div>
+                        </div>
+                        <div>
+                            <h4>Credencial QR móvil</h4>
+                            <p class="text-white mb-0">Ingresa a tu zona de socio, muestra tu QR al guardia y listo. También puedes entrar con tu RUT.</p>
+                        </div>
+                    </div>
+                    <div class="goal-item d-flex p-4 mb-4">
+                        <div class="d-flex me-4">
+                            <div class="bg-primary d-inline p-3" style="width: 80px; height: 80px;">
+                                <img src="{% static 'img/icon-6.png' %}" class="img-fluid" alt="">
+                            </div>
+                        </div>
+                        <div>
+                            <h4>Plan, horario y pagos a la mano</h4>
+                            <p class="text-white mb-0">Consulta la vigencia de tu membresía y tu historial de pagos desde cualquier dispositivo.</p>
+                        </div>
+                    </div>
+                    <div class="ms-1">
+                        {% include 'partials/cta_acceso.html' with clase='btn btn-primary py-3 px-5 ms-2' %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 wow fadeInRight" data-wow-delay="0.2s">
+                <div class="h-100">
+                    <img src="{% static 'img/fitness-goal-banner.png' %}" class="img-fluid h-100" style="object-fit: cover;" alt="Socio entrenando">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Acceso QR End -->
+
+<!-- Features Start -->
+<div class="container-fluid feature bg-light py-5">
+    <div class="container py-5">
+        <div class="text-center mx-auto pb-5 wow fadeInUp" data-wow-delay="0.2s" style="max-width: 800px;">
+            <h4 class="text-primary">¿Por qué elegirnos?</h4>
+            <h1 class="display-4 mb-4">Lo que te ofrecemos</h1>
+        </div>
+        <div class="feature-carousel owl-carousel">
+            <div class="feature-item wow fadeInUp" data-wow-delay="0.2s">
+                <div class="feature-img"><img src="{% static 'img/feature-1.jpg' %}" class="img-fluid w-100" alt=""></div>
+                <div class="feature-content p-4">
+                    <h4 class="mb-3">Equipamiento completo</h4>
+                    <p class="mb-0">Sala de musculación y cardio disponibles en todos los planes.</p>
+                </div>
+            </div>
+            <div class="feature-item wow fadeInUp" data-wow-delay="0.4s">
+                <div class="feature-img"><img src="{% static 'img/feature-2.jpg' %}" class="img-fluid w-100" alt=""></div>
+                <div class="feature-content p-4">
+                    <h4 class="mb-3">Horarios flexibles</h4>
+                    <p class="mb-0">Planes por franja horaria y días de la semana para ajustarse a tu rutina.</p>
+                </div>
+            </div>
+            <div class="feature-item wow fadeInUp" data-wow-delay="0.6s">
+                <div class="feature-img"><img src="{% static 'img/feature-3.jpg' %}" class="img-fluid w-100" alt=""></div>
+                <div class="feature-content p-4">
+                    <h4 class="mb-3">Entrada sin esperas</h4>
+                    <p class="mb-0">Validación inmediata con QR o RUT en la puerta.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-img"><img src="{% static 'img/feature-4.jpg' %}" class="img-fluid w-100" alt=""></div>
+                <div class="feature-content p-4">
+                    <h4 class="mb-3">Zona privada del socio</h4>
+                    <p class="mb-0">Tu plan, tu horario, tus pagos y tu QR en un solo lugar.</p>
+                </div>
+            </div>
+        </div>
+        <div class="feature-shaps"></div>
+    </div>
+</div>
+<!-- Features End -->
+
+<!-- Planes Start -->
+<div class="container-fluid courses overflow-hidden py-5" id="planes">
+    <div class="container py-5">
+        <div class="text-center mx-auto pb-5 wow fadeInUp" data-wow-delay="0.2s" style="max-width: 800px;">
+            <h4 class="text-primary">Nuestros planes</h4>
+            <h1 class="display-4 text-white mb-4">Planes y horarios</h1>
+            <p class="text-white mb-0">Elige la membresía que mejor se adapte a tu rutina semanal.</p>
+        </div>
+        <div class="row gy-4 gx-0 justify-content-center">
+            {% for plan in planes %}
+                {% cycle 'img/icon-1.png' 'img/icon-2.png' 'img/icon-3.png' 'img/icon-4.png' 'img/icon-5.png' 'img/icon-6.png' as icono silent %}
+                <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="{% cycle '0.2s' '0.4s' '0.6s' %}">
+                    <div class="courses-item">
+                        <div class="courses-item-inner p-4">
+                            <div class="d-flex justify-content-between mb-4">
+                                <div class="courses-icon-img p-3">
+                                    <img src="{% static icono %}" class="img-fluid" alt="">
+                                </div>
+                                <div class="data-info d-flex flex-column">
+                                    <div class="courses-date">
+                                        <p class="mb-1 fs-4 fw-bold">${{ plan.precio|floatformat:"0g" }}</p>
+                                        <p class="mb-0">por {{ plan.duracion_dias }} días</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="d-inline-block h4 mb-3 text-white">{{ plan.nombre }}</span>
+                            <p class="mb-2"><i class="fas fa-clock me-2 text-primary"></i>{{ plan.resumen_horario }}</p>
+                            <p class="mb-2"><i class="fas fa-qrcode me-2 text-primary"></i>Credencial QR móvil incluida</p>
+                            <p class="mb-4"><i class="fas fa-check-circle me-2 text-primary"></i>Acceso a musculación y cardio</p>
+                            <a href="#contacto" class="btn btn-primary py-2 px-4"><span>Contratar en recepción</span></a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-white mb-0">Pronto publicaremos nuestros planes disponibles.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!-- Planes End -->
+
+<!-- Entrenadores Start -->
+{% if entrenadores %}
+<div class="container-fluid py-5" id="entrenadores">
+    <div class="container py-5">
+        <div class="text-center mx-auto pb-5" style="max-width: 800px;">
+            <h4 class="text-primary">Nuestro equipo</h4>
+            <h1 class="display-4 mb-4">Entrenadores</h1>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for e in entrenadores %}
+                <div class="col-md-6 col-lg-3 text-center">
+                    {% if e.foto %}
+                        <img src="{{ e.foto.url }}" class="img-fluid mb-3" alt="{{ e.nombre }}" style="height: 280px; width: 100%; object-fit: cover;">
+                    {% else %}
+                        {% cycle 'img/team-1.jpg' 'img/team-2.jpg' 'img/team-3.jpg' 'img/team-4.jpg' as foto_equipo silent %}
+                        <img src="{% static foto_equipo %}" class="img-fluid mb-3" alt="{{ e.nombre }}" style="height: 280px; width: 100%; object-fit: cover;">
+                    {% endif %}
+                    <h4 class="mb-1">{{ e.nombre }}</h4>
+                    <p class="text-primary mb-0">{{ e.especialidad }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+<!-- Entrenadores End -->
+
+<!-- Preguntas frecuentes Start -->
+{% if preguntas %}
+<div class="container-fluid py-5" id="preguntas">
+    <div class="container py-5" style="max-width: 900px;">
+        <div class="text-center pb-4">
+            <h4 class="text-primary">Dudas comunes</h4>
+            <h1 class="display-4 mb-4">Preguntas frecuentes</h1>
+        </div>
+        <div class="accordion" id="faq">
+            {% for q in preguntas %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="faq-h{{ forloop.counter }}">
+                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faq-c{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">{{ q.pregunta }}</button>
+                    </h2>
+                    <div id="faq-c{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faq">
+                        <div class="accordion-body">{{ q.respuesta|linebreaksbr }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+<!-- Preguntas frecuentes End -->
+
+<!-- Formulario de contacto Start -->
+<div class="container-fluid py-5" id="formulario-contacto">
+    <div class="container py-5" style="max-width: 800px;">
+        <div class="text-center pb-4">
+            <h4 class="text-primary">Escríbenos</h4>
+            <h1 class="display-4 mb-4">¿Tienes una consulta?</h1>
+        </div>
+        <form method="post" action="{% url 'publica:enviar_contacto' %}" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">{{ form_contacto.nombre }}</div>
+                <div class="col-md-6">{{ form_contacto.email }}</div>
+                <div class="col-12">{{ form_contacto.telefono }}</div>
+                <div class="col-12">{{ form_contacto.mensaje }}</div>
+                {{ form_contacto.sitio_web }}
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-primary py-3 px-5"><span>Enviar mensaje</span></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Formulario de contacto End -->
+
+<!-- Explore Start -->
+<div class="container-fluid explore py-5 wow zoomIn" data-wow-delay="0.2s">
+    <div class="container py-5 text-center">
+        <h1 class="display-1 text-white mb-4">Empieza hoy</h1>
+        {% include 'partials/cta_acceso.html' with clase='btn btn-primary py-3 px-4 px-md-5 me-2' %}
+    </div>
+</div>
+<!-- Explore End -->
+
+<div style="margin-bottom: 90px;"></div>
+
+{% endblock %}

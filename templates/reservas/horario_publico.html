@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Clases y salas | {{ gym.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="container py-4">
+        <div class="text-center mx-auto pb-4" style="max-width: 800px;">
+            <h4 class="text-primary">Horario</h4>
+            <h1 class="display-5 mb-3">Clases de los próximos 7 días</h1>
+            <p class="mb-0">¿Aún no eres socio? Reserva una clase como visitante
+                {% if tarifa.prueba_gratis %}(<strong>tu primera clase de prueba es gratis</strong>){% else %}(clase suelta ${{ tarifa.precio_clase_suelta|floatformat:"0g" }}){% endif %}.
+                Verificamos tu correo y recibes un código de acceso.</p>
+            <div class="mt-3">
+                <a href="{% url 'reservas:visitante_acceso' %}" class="btn btn-outline-primary me-2">Verificar mi correo</a>
+                <a href="{% url 'reservas:visitante_consulta' %}" class="btn btn-outline-secondary">Consultar o cancelar mi reserva</a>
+            </div>
+        </div>
+
+        {% for fecha, sesiones in dias %}
+            <h5 class="mt-4 mb-3 text-primary text-capitalize">{{ fecha|date:"l d \d\e F" }}</h5>
+            <div class="row g-3">
+                {% for s in sesiones %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="border rounded p-3 h-100 d-flex flex-column">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ s.hora_inicio|time:"H:i" }}–{{ s.hora_fin|time:"H:i" }}</strong>
+                                <span class="badge bg-secondary">{{ s.clase.get_nivel_display }}</span>
+                            </div>
+                            <h5 class="mb-1">{{ s.clase.nombre }}</h5>
+                            <div class="small text-muted mb-2">{{ s.clase.sala.nombre }}{% if s.instructor_efectivo %} · {{ s.instructor_efectivo.get_full_name|default:s.instructor_efectivo.username }}{% endif %}</div>
+                            {% if s.clase.descripcion %}<p class="small mb-2">{{ s.clase.descripcion|truncatechars:90 }}</p>{% endif %}
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                {% if s.libres_externo > 0 %}
+                                    <span class="small text-success">{{ s.libres_externo }} cupo{{ s.libres_externo|pluralize }}</span>
+                                    <a href="{% url 'reservas:visitante_reservar' s.pk %}" class="btn btn-sm btn-primary">Reservar</a>
+                                {% else %}
+                                    <span class="small text-danger">Clase llena</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% empty %}
+            <p class="text-center text-muted py-5">Por ahora no hay clases programadas. ¡Vuelve pronto!</p>
+        {% endfor %}
+
+        <div class="text-center mx-auto pt-5 pb-3" style="max-width: 800px;">
+            <h4 class="text-primary">Nuestras salas</h4>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for sala in salas %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="border rounded overflow-hidden h-100">
+                        {% if sala.foto %}<img src="{{ sala.foto.url }}" alt="{{ sala.nombre }}" class="img-fluid w-100" style="height: 200px; object-fit: cover;">{% endif %}
+                        <div class="p-3">
+                            <h5>{{ sala.nombre }}</h5>
+                            <div class="small text-muted mb-2"><i class="fas fa-users me-1"></i> Capacidad: {{ sala.capacidad }} personas</div>
+                            {% if sala.descripcion %}<p class="small mb-0">{{ sala.descripcion|truncatechars:120 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center text-muted">Pronto publicaremos nuestras salas.</p>
+            {% endfor %}
+        </div>
+        {% if salas %}
+            <div class="text-center mt-4">
+                <a href="{% url 'reservas:visitante_arrendar' %}" class="btn btn-primary">Solicitar arriendo de una sala</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

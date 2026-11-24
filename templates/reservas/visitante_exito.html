@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Reserva recibida | {{ gym.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 640px;">
+    <div class="text-center">
+        <h2 class="mb-3">¡Listo, {{ visitante.nombre }}!</h2>
+        {% if tipo == 'clase' %}
+            <p class="lead">Reservaste <strong>{{ inscripcion.sesion.clase.nombre }}</strong> el {{ inscripcion.sesion.fecha|date:"d/m/Y" }} a las {{ inscripcion.sesion.hora_inicio|time:"H:i" }}.</p>
+            {% if inscripcion.es_prueba %}
+                <p class="text-success"><strong>Es tu primera clase de prueba: no se te cobra.</strong></p>
+            {% else %}
+                <p>Paga <strong>${{ inscripcion.monto|floatformat:"0g" }}</strong> en recepción antes de la clase. Si no pagas en 24 horas, el cupo se libera.</p>
+            {% endif %}
+        {% else %}
+            <p class="lead">Recibimos tu solicitud para <strong>{{ reserva.sala.nombre }}</strong> el {{ reserva.fecha|date:"d/m/Y" }} de {{ reserva.hora_inicio|time:"H:i" }} a {{ reserva.hora_fin|time:"H:i" }}.</p>
+            <p>Precio: <strong>${{ reserva.precio|floatformat:"0g" }}</strong>. El personal la revisará y te avisaremos por correo.</p>
+        {% endif %}
+        <div class="border rounded p-3 my-4">
+            {% if estado_codigo == 'vencido' or estado_codigo == 'cancelado' %}
+                <div class="fw-bold text-secondary">Código desactivado</div>
+                <div class="small">{{ estado_texto }}</div>
+            {% else %}
+                <img src="{{ qr }}" alt="Código QR de acceso" class="img-fluid mb-2" style="max-width: 240px; background: #fff;">
+                <div class="small {% if estado_codigo == 'vigente' %}text-success{% else %}text-muted{% endif %}">{{ estado_texto }}</div>
+                <div class="small text-muted mt-1">Muestra este QR al guardia. Solo sirve durante tu clase o reserva (desde 15 minutos antes hasta el término); después se desactiva solo.</div>
+            {% endif %}
+            <div class="small text-muted mt-2">Código: <span style="word-break: break-all;">{{ codigo }}</span></div>
+        </div>
+        <a href="{% url 'reservas:horario' %}" class="btn btn-primary">Volver al horario</a>
+        <a href="{% url 'reservas:visitante_consulta' %}" class="btn btn-outline-secondary">Consultar o cancelar</a>
+    </div>
+</div>
+{% endblock %}

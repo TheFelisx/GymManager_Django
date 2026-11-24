@@ -1,0 +1,34 @@
+{% if pagina %}
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+            <thead class="thead-light"><tr><th>Socio</th><th>Contacto</th><th>{% if mostrar_venc %}Vence{% else %}Estado{% endif %}</th><th class="text-right"></th></tr></thead>
+            <tbody>
+                {% for s in pagina %}
+                    <tr>
+                        <td><a href="{% url 'panel:detalle_socio' s.pk %}" class="font-weight-bold">{{ s.usuario.get_full_name }}</a><br><small class="text-muted">{{ s.rut_formateado }}</small></td>
+                        <td class="small">{{ s.telefono }}<br>{{ s.usuario.email|default:"Sin correo" }}</td>
+                        <td>
+                            {% if mostrar_venc %}
+                                <span class="badge {{ clase_badge }}">{{ s.ultimo_venc|date:"d/m/Y" }}</span>
+                            {% else %}
+                                <span class="badge badge-secondary">Nunca ha pagado</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right text-nowrap">
+                            <a href="{% url 'panel:registrar_pago' %}?socio={{ s.pk }}" class="btn btn-success btn-sm" title="Registrar pago"><i class="fas fa-cash-register"></i></a>
+                            {% if s.usuario.email %}
+                                <form method="post" action="{% url 'panel:enviar_recordatorio' s.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-primary btn-sm" title="Enviar recordatorio por correo"><i class="fas fa-envelope"></i></button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include 'partials/paginacion.html' %}
+{% else %}
+    <div class="empty-state"><i class="fas fa-check-circle"></i>{{ vacio }}</div>
+{% endif %}

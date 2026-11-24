@@ -1,0 +1,245 @@
+{% extends 'base_sb.html' %}
+{% load static %}
+
+{% block body %}
+{% with ns=request.resolver_match.namespace url_name=request.resolver_match.url_name %}
+<div id="wrapper">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <ul class="navbar-nav bg-gym-sidebar sidebar sidebar-dark accordion" id="accordionSidebar">
+
+        <a class="sidebar-brand d-flex align-items-center justify-content-center"
+           href="{% if user.rol == 'SOCIO' %}{% url 'panel:zona_socio' %}{% elif user.rol == 'GUARDIA' %}{% url 'totem:inicio' %}{% elif user.rol == 'INSTRUCTOR' %}{% url 'reservas:agenda' %}{% else %}{% url 'panel:inicio' %}{% endif %}">
+            <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-dumbbell"></i></div>
+            <div class="sidebar-brand-text mx-3">GymManager <sup>Pro</sup></div>
+        </a>
+
+        <hr class="sidebar-divider my-0">
+
+        {% if user.rol == 'SOCIO' %}
+            <!-- ---------- SOCIO ---------- -->
+            <div class="sidebar-heading mt-3">Mi cuenta</div>
+            <li class="nav-item {% if url_name == 'zona_socio' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'panel:zona_socio' %}">
+                    <i class="fas fa-fw fa-qrcode"></i><span>Mi credencial QR</span>
+                </a>
+            </li>
+            <li class="nav-item {% if url_name == 'mis_clases' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'reservas:mis_clases' %}">
+                    <i class="fas fa-fw fa-calendar-check"></i><span>Mis clases</span>
+                </a>
+            </li>
+            <li class="nav-item {% if url_name == 'mi_perfil' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'panel:mi_perfil' %}">
+                    <i class="fas fa-fw fa-user-edit"></i><span>Mi perfil</span>
+                </a>
+            </li>
+
+        {% elif user.rol == 'INSTRUCTOR' %}
+            <!-- ---------- INSTRUCTOR ---------- -->
+            <div class="sidebar-heading mt-3">Mi trabajo</div>
+            <li class="nav-item {% if url_name == 'agenda' or url_name == 'sesion_instructor' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'reservas:agenda' %}">
+                    <i class="fas fa-fw fa-calendar-alt"></i><span>Mi agenda</span>
+                </a>
+            </li>
+
+        {% elif user.rol == 'GUARDIA' %}
+            <!-- ---------- GUARDIA ---------- -->
+            <div class="sidebar-heading mt-3">Acceso</div>
+            <li class="nav-item {% if ns == 'totem' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'totem:inicio' %}">
+                    <i class="fas fa-fw fa-shield-alt"></i><span>Tótem de acceso</span>
+                </a>
+            </li>
+
+        {% else %}
+            <!-- ---------- PERSONAL (master, admin, recepción) ---------- -->
+            <li class="nav-item {% if ns == 'panel' and url_name == 'inicio' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'panel:inicio' %}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i><span>Inicio</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading">Gestión</div>
+
+            <li class="nav-item {% if url_name == 'lista_socios' or url_name == 'enrolar_socio' or url_name == 'detalle_socio' or url_name == 'editar_socio' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'panel:lista_socios' %}">
+                    <i class="fas fa-fw fa-users"></i><span>Socios</span>
+                </a>
+            </li>
+            <li class="nav-item {% if url_name == 'lista_pagos' or url_name == 'registrar_pago' or url_name == 'anular_pago' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'panel:lista_pagos' %}">
+                    <i class="fas fa-fw fa-cash-register"></i><span>Pagos</span>
+                </a>
+            </li>
+            <li class="nav-item {% if url_name == 'cobranza' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'panel:cobranza' %}">
+                    <i class="fas fa-fw fa-bell"></i><span>Cobranza</span>
+                </a>
+            </li>
+            <li class="nav-item {% if url_name == 'lista_planes' or url_name == 'crear_plan' or url_name == 'editar_plan' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'panel:lista_planes' %}">
+                    <i class="fas fa-fw fa-clipboard-list"></i><span>Planes</span>
+                </a>
+            </li>
+            <li class="nav-item {% if ns == 'totem' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'totem:inicio' %}">
+                    <i class="fas fa-fw fa-qrcode"></i><span>Tótem de acceso</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading">Clases y salas</div>
+            <li class="nav-item {% if url_name == 'ocupacion' or url_name == 'sesion_detalle' or url_name == 'staff_inscribir_visitante' or url_name == 'cancelar_sesion' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'reservas:ocupacion' %}">
+                    <i class="fas fa-fw fa-calendar-day"></i><span>Ocupación del día</span>
+                </a>
+            </li>
+            <li class="nav-item {% if url_name == 'lista_clases' or url_name == 'crear_clase' or url_name == 'editar_clase' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'reservas:lista_clases' %}">
+                    <i class="fas fa-fw fa-running"></i><span>Clases</span>
+                </a>
+            </li>
+            <li class="nav-item {% if url_name == 'lista_salas' or url_name == 'crear_sala' or url_name == 'editar_sala' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'reservas:lista_salas' %}">
+                    <i class="fas fa-fw fa-door-open"></i><span>Salas</span>
+                </a>
+            </li>
+            <li class="nav-item {% if url_name == 'salas_reservas' or url_name == 'reservar_sala' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'reservas:salas_reservas' %}">
+                    <i class="fas fa-fw fa-calendar-plus"></i><span>Reservas de sala</span>
+                </a>
+            </li>
+
+            {% if user.rol == 'MASTER' or user.rol == 'ADMIN' or user.is_superuser %}
+                <hr class="sidebar-divider">
+                <div class="sidebar-heading">Administración</div>
+
+                <li class="nav-item {% if url_name == 'lista_usuarios' or url_name == 'crear_usuario_personal' or url_name == 'editar_usuario' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'panel:lista_usuarios' %}">
+                        <i class="fas fa-fw fa-user-shield"></i><span>Personal</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if url_name == 'solicitudes_cambio' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'reservas:solicitudes_cambio' %}">
+                        <i class="fas fa-fw fa-exchange-alt"></i><span>Cambios de instructor</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if url_name == 'lista_bloqueos' or url_name == 'crear_bloqueo' or url_name == 'editar_tarifas' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'reservas:lista_bloqueos' %}">
+                        <i class="fas fa-fw fa-ban"></i><span>Feriados y cierres</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if url_name == 'informe' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'reservas:informe' %}">
+                        <i class="fas fa-fw fa-chart-bar"></i><span>Informe de clases</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if ns == 'finanzas' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'finanzas:inicio' %}">
+                        <i class="fas fa-fw fa-chart-line"></i><span>Finanzas</span>
+                    </a>
+                </li>
+            {% endif %}
+        {% endif %}
+
+        <hr class="sidebar-divider d-none d-md-block">
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'publica:inicio' %}">
+                <i class="fas fa-fw fa-globe"></i><span>Sitio público</span>
+            </a>
+        </li>
+
+        <hr class="sidebar-divider d-none d-md-block">
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle" aria-label="Contraer menú"></button>
+        </div>
+    </ul>
+    <!-- =================== FIN SIDEBAR =================== -->
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+
+            <!-- ===================== TOPBAR ===================== -->
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3" aria-label="Abrir menú">
+                    <i class="fa fa-bars"></i>
+                </button>
+
+                <span class="d-none d-sm-inline page-title h5 mb-0">{% block page_title %}{% endblock %}</span>
+
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item no-arrow">
+                        <button type="button" id="btn-tema" class="btn btn-link nav-link text-gray-600" title="Cambiar entre modo claro y oscuro" aria-label="Cambiar tema">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+                    <div class="topbar-divider d-none d-sm-block"></div>
+
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                                {{ user.get_full_name|default:user.username }}
+                                <span class="badge badge-secondary ml-1">{{ user.get_rol_display }}</span>
+                            </span>
+                            <img class="img-profile rounded-circle" src="{% static 'img/undraw_profile.svg' %}" alt="Perfil">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                            <span class="dropdown-item-text small text-muted d-lg-none">
+                                {{ user.get_full_name|default:user.username }} · {{ user.get_rol_display }}
+                            </span>
+                            <a class="dropdown-item" href="{% url 'cuentas:cambiar_clave' %}">
+                                <i class="fas fa-key fa-sm fa-fw mr-2 text-gray-400"></i>Cambiar contraseña
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'cuentas:logout' %}">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>Cerrar sesión
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <!-- =================== FIN TOPBAR =================== -->
+
+            <!-- ===================== CONTENIDO ===================== -->
+            <div class="container-fluid">
+                {% include 'partials/mensajes.html' %}
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>&copy; 2026 GymManager Pro</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<script>
+    /* Alternar modo claro/oscuro y recordar la preferencia */
+    (function () {
+        var boton = document.getElementById('btn-tema');
+        if (!boton) { return; }
+        function pintar() {
+            var oscuro = document.documentElement.getAttribute('data-theme') === 'dark';
+            boton.innerHTML = '<i class="fas ' + (oscuro ? 'fa-sun' : 'fa-moon') + '"></i>';
+        }
+        boton.addEventListener('click', function () {
+            var nuevo = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', nuevo);
+            try { localStorage.setItem('gym-theme', nuevo); } catch (e) {}
+            pintar();
+        });
+        pintar();
+    })();
+</script>
+<a class="scroll-to-top rounded" href="#page-top" aria-label="Subir"><i class="fas fa-angle-up"></i></a>
+{% endwith %}
+{% endblock %}

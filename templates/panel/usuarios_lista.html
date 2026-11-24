@@ -1,0 +1,49 @@
+{% extends 'base_panel.html' %}
+
+{% block title %}Personal | GymManager Pro{% endblock %}
+{% block page_title %}Personal{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-2 mb-sm-0 text-gray-800">Equipo y personal</h1>
+    <a href="{% url 'panel:crear_usuario_personal' %}" class="btn btn-primary btn-sm btn-icon-split">
+        <span class="icon text-white-50"><i class="fas fa-user-shield"></i></span>
+        <span class="text">Crear usuario</span>
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    {% if pagina %}
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" width="100%">
+                    <thead>
+                        <tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Estado</th><th class="no-sort">Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for u in pagina %}
+                            <tr>
+                                <td class="font-weight-bold">{{ u.username }}</td>
+                                <td>{{ u.get_full_name|default:"-" }}</td>
+                                <td><span class="badge badge-dark">{{ u.get_rol_display }}</span></td>
+                                <td>
+                                    {% if u.is_active %}<span class="badge badge-success">Activo</span>{% else %}<span class="badge badge-danger">Inactivo</span>{% endif %}
+                                </td>
+                                <td class="text-nowrap">
+                                    {% if user.rol == 'MASTER' or user.is_superuser or u.rol == 'RECEPCIONISTA' or u.rol == 'GUARDIA' or u.rol == 'INSTRUCTOR' %}
+                                        {% include 'partials/acciones_usuario.html' %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'partials/paginacion.html' %}
+        </div>
+    {% else %}
+        <div class="empty-state"><i class="fas fa-users-slash"></i>Sin usuarios registrados.</div>
+    {% endif %}
+</div>
+{% endblock %}
+
